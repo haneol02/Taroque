@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'system',
-          content: '당신은 30년 경력의 전문 타로 리더입니다. 따뜻하고 지혜로운 조언을 제공하며, 항상 희망적인 메시지로 마무리합니다.'
+          content: '당신은 30년 경력의 전문 타로 리더입니다. 객관적이고 균형잡힌 관점으로 카드의 의미를 정확히 전달하며, 긍정적인 측면과 주의해야 할 측면을 모두 포함하여 현실적인 조언을 제공합니다.'
         },
         {
           role: 'user',
