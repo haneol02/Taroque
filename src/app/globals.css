@@ -98,3 +98,52 @@ body {
 .transform-style-preserve-3d {
   transform-style: preserve-3d;
 }
+
+/* 타로 해석 결과 마크다운 스타일 */
+.interpretation-content h2 {
+  @apply text-xl font-medium text-white mt-8 mb-4 first:mt-0;
+}
+
+.interpretation-content h1 {
+  @apply text-2xl font-medium text-white mt-8 mb-4 first:mt-0;
+}
+
+.interpretation-content h3 {
+  @apply text-lg font-medium text-gray-200 mt-6 mb-3 first:mt-0;
+}
+
+.interpretation-content p {
+  @apply text-gray-400 leading-relaxed mb-4;
+}
+
+.interpretation-content ul {
+  @apply mb-4 space-y-2;
+}
+
+.interpretation-content li {
+  @apply text-gray-400 ml-4 relative;
+}
+
+.interpretation-content li::before {
+  content: "•";
+  @apply text-violet-400 font-bold mr-3 absolute -left-4;
+}
+
+.interpretation-content strong {
+  @apply text-white font-medium;
+}
+
+.interpretation-content em {
+  @apply text-violet-300 italic;
+}
+
+/* 카드별 해석 스타일 */
+.interpretation-content h2:before {
+  content: counter(card-counter) ". ";
+  counter-increment: card-counter;
+  @apply text-violet-400 font-bold mr-2;
+}
+
+.interpretation-content {
+  counter-reset: card-counter;
+}

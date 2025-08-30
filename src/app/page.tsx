@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { marked } from 'marked';
 import { CardSelection, ExampleQuestions } from '@/types/tarot';
 import { cardPositions, tarotCards, exampleQuestions } from '@/lib/tarot-data';
 import TarotCard from '@/components/TarotCard';
@@ -175,6 +176,22 @@ export default function Home() {
 
   const getCardInfo = (cardId: number) => {
     return tarotCards.find(card => card.id === cardId);
+  };
+
+  const convertMarkdownToHtml = (markdown: string) => {
+    // marked 설정
+    marked.setOptions({
+      gfm: true,
+      breaks: true
+    });
+
+    try {
+      const html = marked(markdown);
+      return html as string;
+    } catch (error) {
+      console.error('Markdown parsing error:', error);
+      return markdown;
+    }
   };
 
   const pageContent = () => {
@@ -555,12 +572,9 @@ export default function Home() {
 
               <div className="glass rounded-lg p-8 mb-12">
                 <div 
-                  className="text-gray-300 prose prose-slate max-w-none leading-relaxed"
+                  className="text-gray-300 prose prose-invert max-w-none leading-relaxed interpretation-content"
                   dangerouslySetInnerHTML={{
-                    __html: interpretation
-                      .replace(/\n/g, '<br>')
-                      .replace(/## (.*?)(<br>|$)/g, '<h2 class="text-xl font-medium text-white mt-8 mb-4 first:mt-0">$1</h2>')
-                      .replace(/- (.*?)(<br>|$)/g, '<div class="ml-4 mb-2 text-gray-300">• $1</div>')
+                    __html: convertMarkdownToHtml(interpretation)
                   }}
                 />
               </div>
