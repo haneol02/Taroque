@@ -29,7 +29,7 @@ export default function TarotCard({
       <button
         onClick={onClick}
         disabled={isDisabled}
-        className={`aspect-[3/5] rounded-lg transition-all duration-300 overflow-hidden w-full ${
+        className={`aspect-[3/5] rounded-lg transition-all duration-300 overflow-hidden w-full card-flip-container ${
           isSelected
             ? 'ring-2 ring-violet-400 scale-105 shadow-2xl shadow-violet-500/25'
             : isDisabled
@@ -38,20 +38,14 @@ export default function TarotCard({
             ? 'hover:scale-105 hover:shadow-2xl hover:shadow-violet-500/10 cursor-pointer'
             : ''
         }`}
-        style={{
-          perspective: '1000px'
-        }}
       >
         <div 
-          className={`w-full h-full transition-transform duration-700 transform-style-preserve-3d ${
-            isRevealed ? 'rotate-y-180' : ''
+          className={`w-full h-full card-flip-inner ${
+            isRevealed ? 'flipped' : ''
           }`}
-          style={{
-            transformStyle: 'preserve-3d'
-          }}
         >
           {/* 카드 앞면 (뒤집혔을 때 보임) */}
-          <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180">
+          <div className="card-face front">
             {card && (
               <div className="w-full h-full relative">
                 <div className={`w-full h-full relative ${isReversed ? 'transform rotate-180' : ''}`}>
@@ -78,7 +72,7 @@ export default function TarotCard({
           </div>
           
           {/* 카드 뒷면 (기본 상태에서 보임) */}
-          <div className="absolute inset-0 w-full h-full backface-hidden">
+          <div className="card-face back">
             <div className="w-full h-full glass rounded-lg flex items-center justify-center relative overflow-hidden">
               {/* 배경 패턴 */}
               <div className="absolute inset-0 opacity-15">
