@@ -12,6 +12,7 @@ type PageType = 'home' | 'chat' | 'select-cards' | 'result';
 export default function Home() {
   const [currentPage, setCurrentPage] = useState<PageType>('home');
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
   
   // Chat page states
   const [question, setQuestion] = useState('');
@@ -188,6 +189,17 @@ export default function Home() {
     navigateToPage('home');
   };
 
+  const copyEmailToClipboard = async () => {
+    const email = 'gksdjf051@gmail.com';
+    try {
+      await navigator.clipboard.writeText(email);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch (err) {
+      console.error('클립보드 복사 실패:', err);
+    }
+  };
+
   const startNewReading = () => {
     setQuestion('');
     setSelectedCards([]);
@@ -221,7 +233,7 @@ export default function Home() {
   const pageContent = () => {
     if (currentPage === 'home') {
       return (
-        <div className="min-h-screen bg-slate-800 relative overflow-hidden">
+        <div className="min-h-screen bg-slate-800 relative overflow-hidden select-none">
           <div className="container mx-auto px-6 py-40 relative z-10">
             <div className="text-center max-w-4xl mx-auto">
               <div className="mb-8">
@@ -298,6 +310,24 @@ export default function Home() {
                   </p>
                 </div>
               </div>
+
+              {/* 연락처 */}
+              <div className="mt-20 text-center">
+                <p className="text-gray-400 text-sm">
+                  문의사항:{' '}
+                  <button 
+                    onClick={copyEmailToClipboard}
+                    className="text-gray-300 hover:text-gray-200 underline transition-colors duration-200 relative"
+                  >
+                    gksdjf051@gmail.com
+                    {emailCopied && (
+                      <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-slate-700 text-white text-xs px-2 py-1 rounded shadow-lg">
+                        복사됨!
+                      </span>
+                    )}
+                  </button>
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -306,7 +336,7 @@ export default function Home() {
 
     if (currentPage === 'chat') {
       return (
-        <div className="min-h-screen bg-slate-800">
+        <div className="min-h-screen bg-slate-800 select-none">
           <div className="container mx-auto px-6 py-16 relative z-10">
             <div className="max-w-3xl mx-auto">
               <div className="text-center mb-12">
@@ -335,7 +365,7 @@ export default function Home() {
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
                     placeholder="자유롭게 고민을 적어주세요... (최대 500자)"
-                    className="w-full h-40 bg-transparent text-white placeholder-gray-400 border-none outline-none resize-none text-lg leading-relaxed"
+                    className="w-full h-40 bg-transparent text-white placeholder-gray-400 border-none outline-none resize-none text-lg leading-relaxed select-text"
                     maxLength={500}
                   />
                   <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
@@ -395,7 +425,7 @@ export default function Home() {
     if (currentPage === 'select-cards') {
       if (isAnalyzing) {
         return (
-          <div className="min-h-screen bg-slate-800 flex items-center justify-center">
+          <div className="min-h-screen bg-slate-800 flex items-center justify-center select-none">
             <div className="text-center">
               <div className="mb-6">
                 <Image
@@ -417,7 +447,7 @@ export default function Home() {
       }
 
       return (
-        <div className="min-h-screen bg-slate-800">
+        <div className="min-h-screen bg-slate-800 select-none">
           <div className="container mx-auto px-6 py-16 relative z-10">
             <div className="text-center mb-12">
               <h1 className="text-3xl font-light text-white mb-4 text-glow-subtle">
@@ -521,7 +551,7 @@ export default function Home() {
     if (currentPage === 'result') {
       if (isLoadingResult) {
         return (
-          <div className="min-h-screen bg-slate-800 flex items-center justify-center">
+          <div className="min-h-screen bg-slate-800 flex items-center justify-center select-none">
             <div className="text-center">
               <div className="mb-6">
                 <Image
