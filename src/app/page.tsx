@@ -166,6 +166,16 @@ export default function Home() {
 
   const handleExampleClick = (exampleQuestion: string) => {
     setQuestion(exampleQuestion);
+    // 질문이 설정된 후 "다음으로" 버튼 위치로 스크롤
+    setTimeout(() => {
+      const nextButton = document.querySelector('button[type="submit"]');
+      if (nextButton) {
+        nextButton.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
+    }, 100);
   };
 
   const resetToHome = () => {
@@ -231,10 +241,10 @@ export default function Home() {
                   TAROQUE
                 </h1>
                 <div className="w-24 h-0.5 bg-violet-400 mx-auto mb-8"></div>
-                <p className="text-2xl text-gray-300 mb-4 font-light">
+                <p className="text-2xl text-gray-300 mb-4 font-light text-glow-subtle">
                   마음의 답을 찾아드려요.
                 </p>
-                <p className="text-md text-gray-400 mb-16 leading-relaxed">
+                <p className="text-md text-gray-400 mb-16 leading-relaxed text-glow-subtle">
                   고민을 자유롭게 털어놓으세요.<br />타로를 통해 답해드립니다.
                 </p>
               </div>
@@ -242,7 +252,7 @@ export default function Home() {
               <div className="mb-20">
                 <button 
                   onClick={() => navigateToPage('chat')}
-                  className="inline-flex items-center px-8 py-4 glass-lavender text-white font-medium rounded-lg transition-all duration-200 hover:bg-slate-8000/30 transform hover:scale-105"
+                  className="inline-flex items-center px-8 py-4 glass-lavender text-white font-medium rounded-lg transition-all duration-200 hover:bg-slate-8000/30 transform hover:scale-105 active:scale-95 active:bg-slate-8000/40 button-glow-purple"
                 >
                   고민 상담하기
                   <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,8 +263,8 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="glass rounded-lg p-8 text-center transition-all duration-300 hover:bg-white/15">
-                  <div className="w-12 h-12 glass-lavender rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-6 h-6 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-12 h-12 bg-yellow-50/20 border border-yellow-100/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-6 h-6 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                     </svg>
                   </div>
@@ -265,8 +275,8 @@ export default function Home() {
                 </div>
                 
                 <div className="glass rounded-lg p-8 text-center transition-all duration-300 hover:bg-white/15">
-                  <div className="w-12 h-12 glass-lavender rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-6 h-6 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-12 h-12 bg-yellow-50/20 border border-yellow-100/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-6 h-6 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                     </svg>
                   </div>
@@ -277,8 +287,8 @@ export default function Home() {
                 </div>
                 
                 <div className="glass rounded-lg p-8 text-center transition-all duration-300 hover:bg-white/15">
-                  <div className="w-12 h-12 glass-lavender rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-6 h-6 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-12 h-12 bg-yellow-50/20 border border-yellow-100/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-6 h-6 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
                     </svg>
                   </div>
@@ -303,7 +313,7 @@ export default function Home() {
                 <div className="mb-6">
                   <button
                     onClick={() => navigateToPage('home')}
-                    className="inline-flex items-center text-gray-400 hover:text-violet-300 transition-colors duration-200 text-sm"
+                    className="inline-flex items-center text-gray-400 hover:text-violet-300 transition-all duration-200 text-sm transform hover:scale-105 active:scale-95"
                   >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -338,7 +348,7 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={!question.trim() || isLoadingChat}
-                  className="w-full glass-lavender text-white font-medium py-3 md:py-4 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 disabled:cursor-not-allowed disabled:opacity-50 text-sm md:text-base transform hover:scale-105 disabled:transform-none"
+                  className="w-full glass-lavender text-white font-medium py-3 md:py-4 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 disabled:cursor-not-allowed disabled:opacity-50 text-sm md:text-base transform hover:scale-105 active:scale-95 active:bg-slate-8000/40 disabled:transform-none"
                 >
                   {isLoadingChat ? (
                     <div className="flex items-center justify-center">
@@ -367,7 +377,7 @@ export default function Home() {
                         <button
                           key={index}
                           onClick={() => handleExampleClick(question)}
-                          className="text-left p-3 md:p-4 glass-dark hover:bg-white/10 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-xs md:text-sm leading-relaxed transform hover:scale-105"
+                          className="text-left p-3 md:p-4 glass-dark hover:bg-white/10 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-xs md:text-sm leading-relaxed transform hover:scale-105 active:scale-95 active:bg-white/15"
                         >
                           {question}
                         </button>
@@ -497,7 +507,7 @@ export default function Home() {
               <div ref={nextButtonRef} className="text-center">
                 <button
                   onClick={handleProceed}
-                  className="glass-lavender text-white font-medium py-3 md:py-4 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 text-sm md:text-base transform hover:scale-105"
+                  className="glass-lavender text-white font-medium py-3 md:py-4 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 text-sm md:text-base transform hover:scale-105 active:scale-95 active:bg-slate-8000/40"
                 >
                   카드 해석 보기
                 </button>
@@ -596,14 +606,14 @@ export default function Home() {
               <div className="text-center space-y-3 md:space-y-0 md:space-x-4 md:flex md:justify-center">
                 <button
                   onClick={resetToHome}
-                  className="w-full md:w-auto glass-dark text-gray-300 hover:text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105"
+                  className="w-full md:w-auto glass-dark text-gray-300 hover:text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 active:bg-white/15"
                 >
                   홈으로
                 </button>
                 
                 <button
                   onClick={startNewReading}
-                  className="w-full md:w-auto glass-lavender text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 text-sm md:text-base text-center transform hover:scale-105"
+                  className="w-full md:w-auto glass-lavender text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 active:bg-slate-8000/40"
                 >
                   다른 고민 상담하기
                 </button>
