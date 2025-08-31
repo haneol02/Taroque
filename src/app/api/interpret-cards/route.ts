@@ -5,10 +5,11 @@ import { tarotCards } from '@/lib/tarot-data';
 
 export async function POST(request: NextRequest) {
   let selectedCards: CardSelection[] = [];
+  let question = '';
   
   try {
     const requestData = await request.json();
-    const question = requestData.question;
+    question = requestData.question;
     selectedCards = requestData.selectedCards;
 
     if (!question || !selectedCards || !Array.isArray(selectedCards)) {
