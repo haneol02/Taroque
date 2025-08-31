@@ -23,6 +23,7 @@ export default function Home() {
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
   const [reversedCards, setReversedCards] = useState<boolean[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [shuffledCardIndices, setShuffledCardIndices] = useState<number[]>([]);
   const nextButtonRef = useRef<HTMLDivElement>(null);
   
   // Result page states
@@ -67,6 +68,15 @@ export default function Home() {
     }
   };
 
+  const shuffleCards = () => {
+    const indices = Array.from({ length: 78 }, (_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    setShuffledCardIndices(indices);
+  };
+
   const analyzeQuestion = async (userQuestion: string) => {
     try {
       const response = await fetch('/api/analyze-question', {
@@ -80,10 +90,12 @@ export default function Home() {
       const result = await response.json();
       setCardCount(result.cardCount);
       setPositions(result.positions);
+      shuffleCards();
     } catch (error) {
       console.error('Error analyzing question:', error);
       setCardCount(3);
       setPositions(cardPositions[3] || ['과거/원인', '현재 상황', '미래/조언']);
+      shuffleCards();
     } finally {
       setIsAnalyzing(false);
     }
@@ -162,6 +174,7 @@ export default function Home() {
     setReversedCards([]);
     setSelectedCardSelections([]);
     setInterpretation('');
+    setShuffledCardIndices([]);
     navigateToPage('home');
   };
 
@@ -171,6 +184,7 @@ export default function Home() {
     setReversedCards([]);
     setSelectedCardSelections([]);
     setInterpretation('');
+    setShuffledCardIndices([]);
     navigateToPage('chat');
   };
 
@@ -426,23 +440,23 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3 mb-8">
-              {Array.from({ length: 78 }, (_, index) => {
-                const card = tarotCards[index];
-                const isSelected = selectedCards.includes(index);
+              {shuffledCardIndices.map((cardIndex, displayIndex) => {
+                const card = tarotCards[cardIndex];
+                const isSelected = selectedCards.includes(cardIndex);
                 const isDisabled = selectedCards.length >= cardCount && !isSelected;
-                const selectedIndex = selectedCards.indexOf(index);
+                const selectedIndex = selectedCards.indexOf(cardIndex);
                 const isReversed = selectedIndex !== -1 ? reversedCards[selectedIndex] : false;
                 
                 return (
                   <TarotCard
-                    key={index}
+                    key={displayIndex}
                     card={card}
                     isRevealed={isSelected}
                     isReversed={isReversed}
                     isSelected={isSelected}
                     isDisabled={isDisabled}
                     showTooltip={false}
-                    onClick={() => handleCardClick(index)}
+                    onClick={() => handleCardClick(cardIndex)}
                     selectionNumber={selectedIndex !== -1 ? selectedIndex + 1 : undefined}
                   />
                 );
