@@ -45,8 +45,8 @@ export default function ApiKeyInput({ onApiKeyChange }: ApiKeyInputProps) {
   };
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-lg shadow-lg mb-6 border border-purple-200">
-      <h3 className="text-lg font-semibold text-gray-800 mb-3">
+    <div className="glass rounded-lg p-6 mb-6 border border-white/10">
+      <h3 className="text-lg font-semibold text-white mb-3">
         OpenAI API 키 설정
       </h3>
 
@@ -57,12 +57,12 @@ export default function ApiKeyInput({ onApiKeyChange }: ApiKeyInputProps) {
             value={apiKey}
             onChange={handleInputChange}
             placeholder="sk-..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm"
+            className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none text-sm text-white placeholder-gray-400 transition-all duration-200"
           />
           <button
             type="button"
             onClick={() => setShowKey(!showKey)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200"
           >
             {showKey ? '🙈' : '👁️'}
           </button>
@@ -72,7 +72,7 @@ export default function ApiKeyInput({ onApiKeyChange }: ApiKeyInputProps) {
           <button
             onClick={handleSave}
             disabled={!apiKey.trim() || isStored}
-            className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 glass-lavender text-white py-2 px-4 rounded-lg hover:bg-purple-600/30 disabled:bg-gray-700/50 disabled:text-gray-500 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:transform-none"
           >
             {isStored ? '저장됨' : '저장'}
           </button>
@@ -80,16 +80,16 @@ export default function ApiKeyInput({ onApiKeyChange }: ApiKeyInputProps) {
           {isStored && (
             <button
               onClick={handleClear}
-              className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
+              className="bg-red-500/20 border border-red-500/30 text-red-300 py-2 px-4 rounded-lg hover:bg-red-500/30 hover:text-red-200 transition-all duration-200 transform hover:scale-105 active:scale-95"
             >
               삭제
             </button>
           )}
         </div>
 
-        <div className="text-xs text-gray-600 space-y-1">
+        <div className="text-xs text-gray-400 space-y-1">
           <p>• API 키는 브라우저의 로컬 스토리지에 안전하게 저장됩니다</p>
-          <p>• OpenAI API 키는 <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">여기서</a> 발급받을 수 있습니다</p>
+          <p>• OpenAI API 키는 <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 hover:underline transition-colors duration-200">여기서</a> 발급받을 수 있습니다</p>
           <p>• API 키는 외부로 전송되지 않으며, OpenAI API 호출에만 사용됩니다</p>
         </div>
       </div>
