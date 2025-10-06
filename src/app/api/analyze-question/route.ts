@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { openai, analyzeQuestionPrompt } from '@/lib/openai';
+import { createOpenAIClient, analyzeQuestionPrompt } from '@/lib/openai';
 import { cardPositions } from '@/lib/tarot-data';
 import { AnalysisResult } from '@/types/tarot';
 
 export async function POST(request: NextRequest) {
   try {
-    const { question } = await request.json();
+    const { question, apiKey } = await request.json();
 
     if (!question) {
       return NextResponse.json(
@@ -14,6 +14,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'API key is required' },
+        { status: 400 }
+      );
+    }
+
+    const openai = createOpenAIClient(apiKey);
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -39,7 +47,7 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json(analysis);
-    } catch (parseError) {
+    } catch {
       console.error('Failed to parse GPT response:', responseText);
       
       const fallbackCardCount = 3;

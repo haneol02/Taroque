@@ -1,13 +1,11 @@
 import OpenAI from 'openai';
 import { CardSelection } from '@/types/tarot';
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('OPENAI_API_KEY is not set in environment variables');
-}
-
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+export const createOpenAIClient = (apiKey: string) => {
+  return new OpenAI({
+    apiKey: apiKey,
+  });
+};
 
 export const analyzeQuestionPrompt = (userQuestion: string) => `
 사용자의 고민을 분석하여 가장 적합한 타로 카드 수를 결정해주세요.
@@ -34,8 +32,8 @@ export const interpretCardsPrompt = (question: string, selectedCards: CardSelect
 사용자 질문: "${question}"
 
 선택된 카드와 상세 정보:
-${selectedCards.map((card, index) => 
-  `${index + 1}. ${card.position}: ${card.cardName} ${card.isReversed ? '(역방향)' : '(정방향)'}
+${selectedCards.map((card, idx) =>
+  `${idx + 1}. ${card.position}: ${card.cardName} ${card.isReversed ? '(역방향)' : '(정방향)'}
      키워드: ${card.keywords?.join(', ') || ''}
      의미: ${card.meaning || ''}`
 ).join('\n\n')}
@@ -55,7 +53,7 @@ ${selectedCards.map((card, index) =>
 (선택된 카드들이 보여주는 현재 상황과 에너지의 변화 과정을 질문 맥락에서 해석 4-5문장)
 
 ## 카드별 구체적 메시지
-${selectedCards.map((card, index) => 
+${selectedCards.map((card) =>
   `### ${card.position}: ${card.cardName} ${card.isReversed ? '(역방향)' : '(정방향)'}
 "${question}"의 관점에서 이 카드는 [구체적인 상황이나 감정을 질문과 연결하여 설명]. [이 포지션에서 질문자가 알아야 할 핵심 메시지를 3-4문장으로 쉽게 설명]`
 ).join('\n\n')}

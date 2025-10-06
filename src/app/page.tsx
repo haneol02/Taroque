@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { marked } from 'marked';
 import { CardSelection, ExampleQuestions } from '@/types/tarot';
 import { cardPositions, tarotCards, exampleQuestions } from '@/lib/tarot-data';
 import TarotCard from '@/components/TarotCard';
+import ApiKeyInput from '@/components/ApiKeyInput';
 
 type PageType = 'home' | 'chat' | 'select-cards' | 'result';
 
@@ -13,6 +14,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState<PageType>('home');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
+  const [userApiKey, setUserApiKey] = useState('');
   
   // Chat page states
   const [question, setQuestion] = useState('');
@@ -85,7 +87,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ question: userQuestion }),
+        body: JSON.stringify({ question: userQuestion, apiKey: userApiKey }),
       });
 
       const result = await response.json();
@@ -151,7 +153,8 @@ export default function Home() {
         },
         body: JSON.stringify({
           question: userQuestion,
-          selectedCards: cards
+          selectedCards: cards,
+          apiKey: userApiKey
         }),
       });
 
@@ -359,6 +362,8 @@ export default function Home() {
                 </p>
               </div>
 
+              <ApiKeyInput onApiKeyChange={setUserApiKey} />
+
               <form onSubmit={handleChatSubmit} className="mb-12">
                 <div className="glass rounded-lg p-6 mb-6">
                   <textarea
@@ -377,7 +382,7 @@ export default function Home() {
 
                 <button
                   type="submit"
-                  disabled={!question.trim() || isLoadingChat}
+                  disabled={!question.trim() || !userApiKey.trim() || isLoadingChat}
                   className="w-full glass-lavender text-white font-medium py-3 md:py-4 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 disabled:cursor-not-allowed disabled:opacity-50 text-sm md:text-base transform hover:scale-105 active:scale-95 active:bg-slate-8000/40 disabled:transform-none"
                 >
                   {isLoadingChat ? (
@@ -385,7 +390,7 @@ export default function Home() {
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                       분석 중...
                     </div>
-                  ) : '다음으로'}
+                  ) : (!userApiKey.trim() ? 'API 키를 입력해주세요' : '다음으로')}
                 </button>
               </form>
 

@@ -1,20 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { openai, interpretCardsPrompt } from '@/lib/openai';
+import { createOpenAIClient, interpretCardsPrompt } from '@/lib/openai';
 import { CardSelection } from '@/types/tarot';
 import { tarotCards } from '@/lib/tarot-data';
 
 export async function POST(request: NextRequest) {
   let selectedCards: CardSelection[] = [];
   let question = '';
-  
+  let apiKey = '';
+
   try {
     const requestData = await request.json();
     question = requestData.question;
     selectedCards = requestData.selectedCards;
+    apiKey = requestData.apiKey;
 
     if (!question || !selectedCards || !Array.isArray(selectedCards)) {
       return NextResponse.json(
         { error: 'Question and selectedCards are required' },
+        { status: 400 }
+      );
+    }
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'API key is required' },
         { status: 400 }
       );
     }
@@ -29,6 +38,7 @@ export async function POST(request: NextRequest) {
       };
     });
 
+    const openai = createOpenAIClient(apiKey);
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
