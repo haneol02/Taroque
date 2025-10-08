@@ -81,7 +81,7 @@ export default function ApiKeyInput({ onApiKeyChange, onValidationChange, onMode
         }
         return false;
       }
-    } catch (error) {
+    } catch {
       setIsVerified(false);
       setVerificationError('API 키 검증 중 오류가 발생했습니다.');
       localStorage.setItem('openai_api_key_verified', 'false');

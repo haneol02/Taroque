@@ -48,8 +48,11 @@ function interpretSajuPrompt(question: string, sajuInfo: SajuInfo): string {
 }
 
 export async function POST(request: NextRequest) {
+  let sajuInfo;
   try {
-    const { question, sajuInfo, apiKey, model = 'gpt-4o-mini' } = await request.json();
+    const requestData = await request.json();
+    const { question, apiKey, model = 'gpt-4o-mini' } = requestData;
+    sajuInfo = requestData.sajuInfo;
 
     if (!question || !sajuInfo) {
       return NextResponse.json(

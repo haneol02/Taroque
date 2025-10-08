@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { marked } from 'marked';
-import domtoimage from 'dom-to-image-more';
 import { CardSelection, ExampleQuestions } from '@/types/tarot';
 import { cardPositions, tarotCards, exampleQuestions } from '@/lib/tarot-data';
 import TarotCard from '@/components/TarotCard';
@@ -21,7 +20,6 @@ export default function Home() {
   const [emailCopied, setEmailCopied] = useState(false);
   const [userApiKey, setUserApiKey] = useState('');
   const [isApiKeyValid, setIsApiKeyValid] = useState(false);
-  const [selectedService, setSelectedService] = useState<ServiceType>(null);
   const [selectedModel, setSelectedModel] = useState('gpt-4o-mini');
 
   // Chat page states
@@ -249,59 +247,8 @@ export default function Home() {
     }
   };
 
-  const handleDownloadImage = async (ref: React.RefObject<HTMLDivElement | null>, filename: string) => {
-    if (!ref.current) return;
-
-    try {
-      const node = ref.current;
-
-      const dataUrl = await domtoimage.toPng(node, {
-        quality: 1,
-        bgcolor: '#1e293b'
-      });
-
-      const link = document.createElement('a');
-      link.download = `${filename}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (error) {
-      console.error('Image download error:', error);
-      alert('이미지 저장 중 오류가 발생했습니다.');
-    }
-  };
-
-  const handleShareImage = async (ref: React.RefObject<HTMLDivElement | null>) => {
-    if (!ref.current) return;
-
-    try {
-      const node = ref.current;
-
-      const dataUrl = await domtoimage.toPng(node, {
-        quality: 1,
-        bgcolor: '#1e293b'
-      });
-
-      const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], 'taroque-result.png', { type: 'image/png' });
-
-      if (navigator.share && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'Taroque 상담 결과',
-          text: '타로/사주 상담 결과를 공유합니다.',
-        });
-      } else {
-        // Web Share API를 지원하지 않는 경우 이미지 다운로드
-        handleDownloadImage(ref, 'taroque-result');
-      }
-    } catch (error) {
-      console.error('Share error:', error);
-      alert('공유 중 오류가 발생했습니다.');
-    }
-  };
 
   const handleServiceSelect = (service: ServiceType) => {
-    setSelectedService(service);
     if (service === 'tarot') {
       navigateToPage('chat');
     } else if (service === 'saju') {
@@ -899,28 +846,6 @@ export default function Home() {
               </div>
 
               <div className="text-center space-y-3">
-                <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center mb-4">
-                  <button
-                    onClick={() => handleDownloadImage(sajuResultRef, `사주-${new Date().toLocaleDateString()}`)}
-                    className="w-full md:w-auto glass text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                    이미지 저장
-                  </button>
-
-                  <button
-                    onClick={() => handleShareImage(sajuResultRef)}
-                    className="w-full md:w-auto glass text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
-                    </svg>
-                    결과 공유
-                  </button>
-                </div>
-
                 <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center">
                   <button
                     onClick={resetToHome}
@@ -1029,28 +954,6 @@ export default function Home() {
               </div>
 
               <div className="text-center space-y-3">
-                <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center mb-4">
-                  <button
-                    onClick={() => handleDownloadImage(resultRef, `타로-${new Date().toLocaleDateString()}`)}
-                    className="w-full md:w-auto glass text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                    이미지 저장
-                  </button>
-
-                  <button
-                    onClick={() => handleShareImage(resultRef)}
-                    className="w-full md:w-auto glass text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
-                    </svg>
-                    결과 공유
-                  </button>
-                </div>
-
                 <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center">
                   <button
                     onClick={resetToHome}

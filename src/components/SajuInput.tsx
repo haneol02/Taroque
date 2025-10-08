@@ -237,7 +237,7 @@ export default function SajuInput({ onSajuInfoChange }: SajuInputProps) {
         <div className="text-xs text-gray-400 space-y-1">
           <p>• 년도는 4자리, 월/일은 2자리 숫자로 입력해주세요 (예: 1990년 01월 15일)</p>
           <p>• 태어난 시간을 모르시는 경우 체크박스를 선택하시면 정오(12시)를 기준으로 분석합니다</p>
-          <p>• 음력 생일인 경우 '음력' 체크박스를 선택해주세요</p>
+          <p>• 음력 생일인 경우 &apos;음력&apos; 체크박스를 선택해주세요</p>
         </div>
       </div>
     </div>

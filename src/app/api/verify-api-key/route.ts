@@ -29,9 +29,10 @@ export async function POST(request: NextRequest) {
       });
 
       return NextResponse.json({ valid: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // API 키가 유효하지 않은 경우
-      if (error.status === 401 || error.code === 'invalid_api_key') {
+      const apiError = error as { status?: number; code?: string; message?: string };
+      if (apiError.status === 401 || apiError.code === 'invalid_api_key') {
         return NextResponse.json(
           { valid: false, error: 'Invalid API key' },
           { status: 401 }
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
 
       // 기타 오류 (할당량 초과 등)
       return NextResponse.json(
-        { valid: false, error: error.message || 'API key verification failed' },
+        { valid: false, error: apiError.message || 'API key verification failed' },
         { status: 400 }
       );
     }
