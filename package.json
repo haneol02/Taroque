@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/marked": "^5.0.2",
+    "dom-to-image-more": "^3.7.1",
     "marked": "^16.2.1",
     "next": "15.5.2",
     "openai": "^5.16.0",

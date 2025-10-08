@@ -40,3 +40,30 @@ export interface ExampleQuestions {
   life: string[];
   relationship: string[];
 }
+
+// 사주 관련 타입
+export interface SajuInfo {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  isLunar: boolean;
+  gender: 'male' | 'female';
+}
+
+export interface SajuReading {
+  id: string;
+  userId?: string;
+  question: string;
+  sajuInfo: SajuInfo;
+  interpretation: string;
+  createdAt: Date;
+}
+
+export interface SajuExampleQuestions {
+  fortune: string[];
+  career: string[];
+  love: string[];
+  health: string[];
+}

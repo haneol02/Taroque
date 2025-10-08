@@ -3,22 +3,35 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { marked } from 'marked';
+import domtoimage from 'dom-to-image-more';
 import { CardSelection, ExampleQuestions } from '@/types/tarot';
 import { cardPositions, tarotCards, exampleQuestions } from '@/lib/tarot-data';
 import TarotCard from '@/components/TarotCard';
 import ApiKeyInput from '@/components/ApiKeyInput';
+import SajuInput from '@/components/SajuInput';
+import { SajuInfo, SajuExampleQuestions } from '@/types/tarot';
+import { sajuExampleQuestions } from '@/lib/saju-data';
 
-type PageType = 'home' | 'chat' | 'select-cards' | 'result';
+type PageType = 'home' | 'select-service' | 'chat' | 'saju-chat' | 'select-cards' | 'saju-result' | 'result';
+type ServiceType = 'tarot' | 'saju' | null;
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState<PageType>('home');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
   const [userApiKey, setUserApiKey] = useState('');
-  
+  const [isApiKeyValid, setIsApiKeyValid] = useState(false);
+  const [selectedService, setSelectedService] = useState<ServiceType>(null);
+  const [selectedModel, setSelectedModel] = useState('gpt-4o-mini');
+
   // Chat page states
   const [question, setQuestion] = useState('');
   const [isLoadingChat, setIsLoadingChat] = useState(false);
+
+  // Saju page states
+  const [sajuInfo, setSajuInfo] = useState<SajuInfo | null>(null);
+  const [sajuInterpretation, setSajuInterpretation] = useState('');
+  const [isLoadingSaju, setIsLoadingSaju] = useState(false);
   
   // Select cards page states
   const [cardCount, setCardCount] = useState(3);
@@ -28,6 +41,8 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shuffledCardIndices, setShuffledCardIndices] = useState<number[]>([]);
   const nextButtonRef = useRef<HTMLDivElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
+  const sajuResultRef = useRef<HTMLDivElement>(null);
   
   // Result page states
   const [selectedCardSelections, setSelectedCardSelections] = useState<CardSelection[]>([]);
@@ -87,7 +102,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ question: userQuestion, apiKey: userApiKey }),
+        body: JSON.stringify({ question: userQuestion, apiKey: userApiKey, model: selectedModel }),
       });
 
       const result = await response.json();
@@ -154,7 +169,8 @@ export default function Home() {
         body: JSON.stringify({
           question: userQuestion,
           selectedCards: cards,
-          apiKey: userApiKey
+          apiKey: userApiKey,
+          model: selectedModel
         }),
       });
 
@@ -233,6 +249,107 @@ export default function Home() {
     }
   };
 
+  const handleDownloadImage = async (ref: React.RefObject<HTMLDivElement | null>, filename: string) => {
+    if (!ref.current) return;
+
+    try {
+      const node = ref.current;
+
+      const dataUrl = await domtoimage.toPng(node, {
+        quality: 1,
+        bgcolor: '#1e293b'
+      });
+
+      const link = document.createElement('a');
+      link.download = `${filename}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error('Image download error:', error);
+      alert('이미지 저장 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleShareImage = async (ref: React.RefObject<HTMLDivElement | null>) => {
+    if (!ref.current) return;
+
+    try {
+      const node = ref.current;
+
+      const dataUrl = await domtoimage.toPng(node, {
+        quality: 1,
+        bgcolor: '#1e293b'
+      });
+
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], 'taroque-result.png', { type: 'image/png' });
+
+      if (navigator.share && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Taroque 상담 결과',
+          text: '타로/사주 상담 결과를 공유합니다.',
+        });
+      } else {
+        // Web Share API를 지원하지 않는 경우 이미지 다운로드
+        handleDownloadImage(ref, 'taroque-result');
+      }
+    } catch (error) {
+      console.error('Share error:', error);
+      alert('공유 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleServiceSelect = (service: ServiceType) => {
+    setSelectedService(service);
+    if (service === 'tarot') {
+      navigateToPage('chat');
+    } else if (service === 'saju') {
+      navigateToPage('saju-chat');
+    }
+  };
+
+  const handleSajuSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!question.trim() || !sajuInfo) return;
+
+    setIsLoadingSaju(true);
+    navigateToPage('saju-result');
+    await interpretSaju(question, sajuInfo);
+  };
+
+  const interpretSaju = async (userQuestion: string, userSajuInfo: SajuInfo) => {
+    try {
+      const response = await fetch('/api/interpret-saju', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: userQuestion,
+          sajuInfo: userSajuInfo,
+          apiKey: userApiKey,
+          model: selectedModel
+        }),
+      });
+
+      const result = await response.json();
+      setSajuInterpretation(result.interpretation);
+    } catch (error) {
+      console.error('Error interpreting saju:', error);
+      setSajuInterpretation('해석 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoadingSaju(false);
+    }
+  };
+
+  const sajuCategories = [
+    { key: 'fortune' as keyof SajuExampleQuestions, label: '재물운' },
+    { key: 'career' as keyof SajuExampleQuestions, label: '진로/사업' },
+    { key: 'love' as keyof SajuExampleQuestions, label: '연애/결혼' },
+    { key: 'health' as keyof SajuExampleQuestions, label: '건강' }
+  ];
+
   const pageContent = () => {
     if (currentPage === 'home') {
       return (
@@ -263,16 +380,27 @@ export default function Home() {
                   고민을 자유롭게 털어놓으세요.<br />타로를 통해 답해드립니다.
                 </p>
               </div>
-              
+
+              <div className="mb-12 max-w-2xl mx-auto">
+                <ApiKeyInput
+                  onApiKeyChange={setUserApiKey}
+                  onValidationChange={setIsApiKeyValid}
+                  onModelChange={setSelectedModel}
+                />
+              </div>
+
               <div className="mb-20">
-                <button 
-                  onClick={() => navigateToPage('chat')}
-                  className="inline-flex items-center px-8 py-4 glass-lavender text-white font-medium rounded-lg transition-all duration-200 hover:bg-slate-8000/30 transform hover:scale-105 active:scale-95 active:bg-slate-8000/40 button-glow-purple"
+                <button
+                  onClick={() => navigateToPage('select-service')}
+                  disabled={!isApiKeyValid}
+                  className="inline-flex items-center px-8 py-4 glass-lavender text-white font-medium rounded-lg transition-all duration-200 hover:bg-slate-8000/30 transform hover:scale-105 active:scale-95 active:bg-slate-8000/40 button-glow-purple disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  고민 상담하기
-                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
+                  {isApiKeyValid ? '상담 시작하기' : 'API 키를 먼저 인증해주세요'}
+                  {isApiKeyValid && (
+                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  )}
                 </button>
               </div>
 
@@ -337,6 +465,82 @@ export default function Home() {
       );
     }
 
+    if (currentPage === 'select-service') {
+      return (
+        <div className="min-h-screen bg-slate-800 select-none">
+          <div className="container mx-auto px-6 py-16 relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-12">
+                <div className="mb-6">
+                  <button
+                    onClick={() => navigateToPage('home')}
+                    className="inline-flex items-center text-gray-400 hover:text-violet-300 transition-all duration-200 text-sm transform hover:scale-105 active:scale-95"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    홈으로 돌아가기
+                  </button>
+                </div>
+                <h1 className="text-3xl font-light text-white mb-4 text-glow-subtle">
+                  어떤 상담을 원하시나요?
+                </h1>
+                <p className="text-gray-400 text-lg">
+                  타로와 사주 중 선택해주세요
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* 타로 카드 */}
+                <button
+                  onClick={() => handleServiceSelect('tarot')}
+                  className="glass rounded-lg p-8 text-center transition-all duration-300 hover:bg-white/15 transform hover:scale-105 active:scale-95"
+                >
+                  <div className="w-20 h-20 bg-purple-50/20 border border-purple-100/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-10 h-10 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-medium text-white mb-4">타로</h2>
+                  <p className="text-gray-300 mb-6 leading-relaxed">
+                    직관적인 카드를 통해<br />
+                    현재 상황과 미래를 살펴봅니다
+                  </p>
+                  <div className="space-y-2 text-sm text-gray-400">
+                    <p>✓ 빠른 상담 (5-10분)</p>
+                    <p>✓ 구체적인 질문에 적합</p>
+                    <p>✓ 현재 상황 중심 해석</p>
+                  </div>
+                </button>
+
+                {/* 사주 카드 */}
+                <button
+                  onClick={() => handleServiceSelect('saju')}
+                  className="glass rounded-lg p-8 text-center transition-all duration-300 hover:bg-white/15 transform hover:scale-105 active:scale-95"
+                >
+                  <div className="w-20 h-20 bg-amber-50/20 border border-amber-100/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-10 h-10 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-medium text-white mb-4">사주</h2>
+                  <p className="text-gray-300 mb-6 leading-relaxed">
+                    생년월일시를 기반으로<br />
+                    운명과 운세를 깊이 분석합니다
+                  </p>
+                  <div className="space-y-2 text-sm text-gray-400">
+                    <p>✓ 종합 상담 (10-15분)</p>
+                    <p>✓ 인생 전반적인 조언</p>
+                    <p>✓ 장기적 운세 파악</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (currentPage === 'chat') {
       return (
         <div className="min-h-screen bg-slate-800 select-none">
@@ -362,8 +566,6 @@ export default function Home() {
                 </p>
               </div>
 
-              <ApiKeyInput onApiKeyChange={setUserApiKey} />
-
               <form onSubmit={handleChatSubmit} className="mb-12">
                 <div className="glass rounded-lg p-6 mb-6">
                   <textarea
@@ -382,7 +584,7 @@ export default function Home() {
 
                 <button
                   type="submit"
-                  disabled={!question.trim() || !userApiKey.trim() || isLoadingChat}
+                  disabled={!question.trim() || !isApiKeyValid || isLoadingChat}
                   className="w-full glass-lavender text-white font-medium py-3 md:py-4 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 disabled:cursor-not-allowed disabled:opacity-50 text-sm md:text-base transform hover:scale-105 active:scale-95 active:bg-slate-8000/40 disabled:transform-none"
                 >
                   {isLoadingChat ? (
@@ -390,7 +592,7 @@ export default function Home() {
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                       분석 중...
                     </div>
-                  ) : (!userApiKey.trim() ? 'API 키를 입력해주세요' : '다음으로')}
+                  ) : (!isApiKeyValid ? 'API 키를 먼저 인증해주세요' : '다음으로')}
                 </button>
               </form>
 
@@ -553,6 +755,194 @@ export default function Home() {
       );
     }
 
+    if (currentPage === 'saju-chat') {
+      return (
+        <div className="min-h-screen bg-slate-800 select-none">
+          <div className="container mx-auto px-6 py-16 relative z-10">
+            <div className="max-w-3xl mx-auto">
+              <div className="text-center mb-12">
+                <div className="mb-6">
+                  <button
+                    onClick={() => navigateToPage('select-service')}
+                    className="inline-flex items-center text-gray-400 hover:text-violet-300 transition-all duration-200 text-sm transform hover:scale-105 active:scale-95"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    뒤로 가기
+                  </button>
+                </div>
+                <h1 className="text-3xl font-light text-white mb-4 text-glow-subtle">
+                  사주 상담
+                </h1>
+                <p className="text-gray-400 text-lg">
+                  생년월일시와 궁금한 점을 알려주세요
+                </p>
+              </div>
+
+              <SajuInput onSajuInfoChange={setSajuInfo} />
+
+              <form onSubmit={handleSajuSubmit} className="mb-12">
+                <div className="glass rounded-lg p-6 mb-6">
+                  <textarea
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    placeholder="궁금한 점을 자유롭게 적어주세요... (최대 500자)"
+                    className="w-full h-40 bg-transparent text-white placeholder-gray-400 border-none outline-none resize-none text-lg leading-relaxed select-text"
+                    maxLength={500}
+                  />
+                  <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
+                    <span className="text-gray-400 text-sm">
+                      {question.length}/500
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={!question.trim() || !sajuInfo || !isApiKeyValid || isLoadingSaju}
+                  className="w-full glass-lavender text-white font-medium py-3 md:py-4 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 disabled:cursor-not-allowed disabled:opacity-50 text-sm md:text-base transform hover:scale-105 active:scale-95 active:bg-slate-8000/40 disabled:transform-none"
+                >
+                  {isLoadingSaju ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      사주 풀이 중...
+                    </div>
+                  ) : (!sajuInfo ? '생년월일시를 입력해주세요' : '사주 풀이 보기')}
+                </button>
+              </form>
+
+              <div className="space-y-8">
+                <div className="text-center">
+                  <h2 className="text-xl font-light text-white mb-2 text-glow-subtle">
+                    예시 질문들
+                  </h2>
+                  <div className="w-16 h-0.5 bg-violet-400 mx-auto"></div>
+                </div>
+
+                {sajuCategories.map((category) => (
+                  <div key={category.key} className="glass rounded-lg p-6">
+                    <h3 className="text-lg font-medium text-white mb-4">
+                      {category.label}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {sajuExampleQuestions[category.key].map((q, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleExampleClick(q)}
+                          className="text-left p-3 md:p-4 glass-dark hover:bg-white/10 rounded-lg text-gray-300 hover:text-white transition-all duration-200 text-xs md:text-sm leading-relaxed transform hover:scale-105 active:scale-95 active:bg-white/15"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (currentPage === 'saju-result') {
+      if (isLoadingSaju) {
+        return (
+          <div className="min-h-screen bg-slate-800 flex items-center justify-center select-none">
+            <div className="text-center">
+              <div className="mb-6">
+                <Image
+                  src="/logo.png"
+                  alt="Loading..."
+                  width={64}
+                  height={64}
+                  className="w-16 h-16 mx-auto animate-spin"
+                  style={{
+                    filter: 'drop-shadow(0 0 15px rgba(196, 181, 253, 0.8)) drop-shadow(0 0 30px rgba(196, 181, 253, 0.6)) drop-shadow(0 0 60px rgba(196, 181, 253, 0.4))'
+                  }}
+                />
+              </div>
+              <h2 className="text-xl font-light text-white mb-2 text-glow-subtle">사주를 풀이하고 있어요</h2>
+              <p className="text-gray-400">잠시만 기다려주세요...</p>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen bg-slate-800">
+          <div className="container mx-auto px-6 py-16 relative z-10">
+            <div className="max-w-5xl mx-auto" ref={sajuResultRef}>
+              <div className="text-center mb-12">
+                <h1 className="text-3xl font-light text-white mb-6 text-glow-subtle">
+                  사주 풀이 결과
+                </h1>
+                <div className="glass rounded-lg p-6 max-w-3xl mx-auto">
+                  <p className="text-gray-300 text-lg leading-relaxed">
+                    <span className="text-white font-medium">질문:</span> {question}
+                  </p>
+                  {sajuInfo && (
+                    <p className="text-gray-400 text-sm mt-3">
+                      {sajuInfo.year}년 {sajuInfo.month}월 {sajuInfo.day}일 {sajuInfo.hour}시 {sajuInfo.minute}분 ({sajuInfo.isLunar ? '음력' : '양력'}) / {sajuInfo.gender === 'male' ? '남성' : '여성'}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="glass rounded-lg p-8 mb-12">
+                <div
+                  className="text-gray-300 prose prose-invert max-w-none leading-relaxed interpretation-content"
+                  dangerouslySetInnerHTML={{
+                    __html: convertMarkdownToHtml(sajuInterpretation)
+                  }}
+                />
+              </div>
+
+              <div className="text-center space-y-3">
+                <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center mb-4">
+                  <button
+                    onClick={() => handleDownloadImage(sajuResultRef, `사주-${new Date().toLocaleDateString()}`)}
+                    className="w-full md:w-auto glass text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    이미지 저장
+                  </button>
+
+                  <button
+                    onClick={() => handleShareImage(sajuResultRef)}
+                    className="w-full md:w-auto glass text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    결과 공유
+                  </button>
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center">
+                  <button
+                    onClick={resetToHome}
+                    className="w-full md:w-auto glass-dark text-gray-300 hover:text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 active:bg-white/15"
+                  >
+                    홈으로
+                  </button>
+
+                  <button
+                    onClick={() => navigateToPage('saju-chat')}
+                    className="w-full md:w-auto glass-lavender text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 active:bg-slate-8000/40"
+                  >
+                    다른 질문하기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (currentPage === 'result') {
       if (isLoadingResult) {
         return (
@@ -580,7 +970,7 @@ export default function Home() {
       return (
         <div className="min-h-screen bg-slate-800">
           <div className="container mx-auto px-6 py-16 relative z-10">
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-5xl mx-auto" ref={resultRef}>
               <div className="text-center mb-12">
                 <h1 className="text-3xl font-light text-white mb-6 text-glow-subtle">
                   리딩 결과
@@ -638,20 +1028,44 @@ export default function Home() {
                 />
               </div>
 
-              <div className="text-center space-y-3 md:space-y-0 md:space-x-4 md:flex md:justify-center">
-                <button
-                  onClick={resetToHome}
-                  className="w-full md:w-auto glass-dark text-gray-300 hover:text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 active:bg-white/15"
-                >
-                  홈으로
-                </button>
-                
-                <button
-                  onClick={startNewReading}
-                  className="w-full md:w-auto glass-lavender text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 active:bg-slate-8000/40"
-                >
-                  다른 고민 상담하기
-                </button>
+              <div className="text-center space-y-3">
+                <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center mb-4">
+                  <button
+                    onClick={() => handleDownloadImage(resultRef, `타로-${new Date().toLocaleDateString()}`)}
+                    className="w-full md:w-auto glass text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    이미지 저장
+                  </button>
+
+                  <button
+                    onClick={() => handleShareImage(resultRef)}
+                    className="w-full md:w-auto glass text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    결과 공유
+                  </button>
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center">
+                  <button
+                    onClick={resetToHome}
+                    className="w-full md:w-auto glass-dark text-gray-300 hover:text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-white/10 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 active:bg-white/15"
+                  >
+                    홈으로
+                  </button>
+
+                  <button
+                    onClick={startNewReading}
+                    className="w-full md:w-auto glass-lavender text-white font-medium py-2.5 md:py-3 px-6 md:px-8 rounded-lg transition-all duration-200 hover:bg-slate-8000/30 text-sm md:text-base text-center transform hover:scale-105 active:scale-95 active:bg-slate-8000/40"
+                  >
+                    다른 고민 상담하기
+                  </button>
+                </div>
               </div>
             </div>
           </div>

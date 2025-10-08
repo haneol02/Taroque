@@ -7,12 +7,14 @@ export async function POST(request: NextRequest) {
   let selectedCards: CardSelection[] = [];
   let question = '';
   let apiKey = '';
+  let model = 'gpt-4o-mini';
 
   try {
     const requestData = await request.json();
     question = requestData.question;
     selectedCards = requestData.selectedCards;
     apiKey = requestData.apiKey;
+    model = requestData.model || 'gpt-4o-mini';
 
     if (!question || !selectedCards || !Array.isArray(selectedCards)) {
       return NextResponse.json(
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     const openai = createOpenAIClient(apiKey);
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: model,
       messages: [
         {
           role: 'system',

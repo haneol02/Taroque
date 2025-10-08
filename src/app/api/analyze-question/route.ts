@@ -5,7 +5,7 @@ import { AnalysisResult } from '@/types/tarot';
 
 export async function POST(request: NextRequest) {
   try {
-    const { question, apiKey } = await request.json();
+    const { question, apiKey, model = 'gpt-4o-mini' } = await request.json();
 
     if (!question) {
       return NextResponse.json(
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     const openai = createOpenAIClient(apiKey);
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: model,
       messages: [
         {
           role: 'system',
