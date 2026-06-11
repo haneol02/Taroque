@@ -22,28 +22,29 @@ interface Selection {
 const CARD_W = 72;
 const CARD_H = 120;
 const FAN_X_SPAN = 1020;
-const FAN_SAG = 48;
-const FAN_CONTAINER_H = 260;
+const FAN_SAG = 90;        // 오른쪽 끝의 최대 상승 높이
+const FAN_CONTAINER_H = 290;
 
-// ── 모바일 손패(하스스톤) 파라미터
-const MW = 82;    // 카드 너비
-const MH = 137;   // 카드 높이 (3:5 비율)
-const WR = 720;   // 휠 반지름 (크게 = 완만한 아치)
-const WCH = 320;  // 컨테이너 높이
-// 아치 기준점: 중앙 카드 center가 컨테이너 바닥 - MH/2에 오도록
-// y = BASE_Y + WR*cos(θ)  →  θ=0일 때 y = WCH - MH/2
-const W_BASE_Y = WCH - WR - Math.round(MH / 2); // 음수 (원 중심이 컨테이너 위)
+// ── 모바일 원형 휠 파라미터
+const MW = 80;    // 카드 너비
+const MH = 134;   // 카드 높이 (3:5 비율)
+const WR = 460;   // 휠 반지름
+const WCH = 310;  // 컨테이너 높이
+// cy = WR + MH/2 → 맨 위 카드의 top이 컨테이너 y=0에 정확히 맞음
+const WCY = WR + Math.round(MH / 2); // 527
 
 function getCardFanStyle(index: number, total: number) {
   const t = index / (total - 1);
   const x = (t - 0.5) * FAN_X_SPAN;
-  const yUp = Math.sin(t * Math.PI) * FAN_SAG;
+  // 오른쪽(t=1)이 가장 높은 단조 상승 아치
+  const yUp = Math.sin(t * Math.PI / 2) * FAN_SAG;
   const rotation = (t - 0.5) * -26;
   return {
     left: `calc(50% + ${x}px - ${CARD_W / 2}px)`,
     top: `${FAN_CONTAINER_H - CARD_H - 6 - yUp}px`,
     transform: `rotate(${rotation}deg)`,
-    zIndex: Math.round(100 - Math.abs(t - 0.5) * 80),
+    // 오른쪽 카드가 위에 겹치도록
+    zIndex: Math.round(t * 80 + 10),
   } as React.CSSProperties;
 }
 
@@ -349,6 +350,7 @@ function MobileCardWheel({
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
 
   const cx = containerW / 2;
+  const cy = WCY; // WR + MH/2 = 527 → 맨 위 카드 top이 y=0
   const n = shuffledIndices.length;
   const angStep = 360 / n;
 
@@ -363,17 +365,17 @@ function MobileCardWheel({
     >
       {shuffledIndices.map((cardIndex, i) => {
         const angleDeg = ((rotation + i * angStep) % 360 + 360) % 360;
-        // 0 = 하단 중앙, +값 = 오른쪽, -값 = 왼쪽 (-180~180)
+        // 0 = 상단 중앙, +값 = 오른쪽, -값 = 왼쪽
         const normAngle = angleDeg > 180 ? angleDeg - 360 : angleDeg;
-        const distFromCenter = Math.abs(normAngle);
+        const distFromTop = Math.abs(normAngle);
 
-        // 시야 밖 카드 스킵
-        if (distFromCenter > 62) return null;
+        // 시야 밖 카드 스킵 (성능)
+        if (distFromTop > 72) return null;
 
         const rad = (angleDeg * Math.PI) / 180;
-        // 하스스톤 손패 아치: 중앙이 하단, 측면이 위로 올라감
+        // 원형 상단 아치: 중앙이 상단, 측면이 아래로 내려감
         const x = cx + WR * Math.sin(rad);
-        const y = W_BASE_Y + WR * Math.cos(rad);
+        const y = cy - WR * Math.cos(rad);
 
         if (y - MH / 2 > WCH || y + MH / 2 < 0) return null;
 
@@ -381,12 +383,11 @@ function MobileCardWheel({
         const dimmed = isDimmed(cardIndex);
         const picking = pickingIndex === cardIndex;
 
-        const t = Math.min(distFromCenter / 55, 1);
-        const scale = 1 - t * 0.28;
-        const alpha = selected ? 0 : dimmed ? 0.15 : 1 - t * 0.45;
-        // 중앙 카드 위로 살짝 강조
-        const centerLift = distFromCenter < 6 ? -8 : 0;
-        const tilt = normAngle * 0.9;
+        const t = Math.min(distFromTop / 65, 1);
+        const scale = 1 - t * 0.22;
+        const alpha = selected ? 0 : dimmed ? 0.15 : 1 - t * 0.4;
+        // 원의 접선 방향으로 카드 기울기
+        const tilt = normAngle * 0.88;
 
         return (
           <button
@@ -402,9 +403,9 @@ function MobileCardWheel({
               top: `${y - MH / 2}px`,
               width: `${MW}px`,
               height: `${MH}px`,
-              transform: `rotate(${tilt}deg) scale(${scale}) translateY(${centerLift}px)${picking ? ' translateY(-65px) scale(1.15)' : ''}`,
+              transform: `rotate(${tilt}deg) scale(${scale})${picking ? ' translateY(-60px) scale(1.15)' : ''}`,
               opacity: alpha,
-              zIndex: Math.round(100 - distFromCenter),
+              zIndex: Math.round(100 - distFromTop),
               transition: picking
                 ? 'transform 0.15s ease-out, opacity 0.15s'
                 : 'opacity 0.2s ease',
@@ -415,18 +416,18 @@ function MobileCardWheel({
         );
       })}
 
-      {/* 중앙 하이라이트 라인 */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-px w-px h-5 pointer-events-none"
-        style={{ background: 'linear-gradient(to top, rgba(212,175,55,0.6), transparent)' }} />
+      {/* 중앙 기준선 */}
+      <div className="absolute top-0 left-1/2 -translate-x-px w-px h-5 pointer-events-none"
+        style={{ background: 'linear-gradient(to bottom, rgba(212,175,55,0.6), transparent)' }} />
 
       {/* 사이드 페이드 */}
       <div className="absolute inset-y-0 left-0 w-14 pointer-events-none"
-        style={{ background: 'linear-gradient(to right, rgba(16,14,48,1) 20%, transparent)' }} />
+        style={{ background: 'linear-gradient(to right, rgba(16,14,48,1) 25%, transparent)' }} />
       <div className="absolute inset-y-0 right-0 w-14 pointer-events-none"
-        style={{ background: 'linear-gradient(to left, rgba(16,14,48,1) 20%, transparent)' }} />
-      {/* 상단 페이드 */}
-      <div className="absolute top-0 left-0 right-0 h-12 pointer-events-none"
-        style={{ background: 'linear-gradient(to bottom, rgba(16,14,48,0.8), transparent)' }} />
+        style={{ background: 'linear-gradient(to left, rgba(16,14,48,1) 25%, transparent)' }} />
+      {/* 하단 페이드 */}
+      <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+        style={{ background: 'linear-gradient(to top, rgba(16,14,48,1), transparent)' }} />
     </div>
   );
 }
