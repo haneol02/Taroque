@@ -265,9 +265,26 @@ body {
   z-index: 0;
 }
 
-/* 팬 스크롤바 숨기기 */
-.fan-scroll::-webkit-scrollbar { display: none; }
-.fan-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+/* 팬·모바일 스크롤바 숨기기 */
+.fan-scroll::-webkit-scrollbar,
+.mobile-card-scroll::-webkit-scrollbar { display: none; }
+.fan-scroll,
+.mobile-card-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* 모바일 카드 뒷면 */
+.mobile-card-back {
+  background: linear-gradient(160deg, #1c1640 0%, #13102e 50%, #0c0a1e 100%);
+  border: 1px solid rgba(212,175,55,0.35);
+}
+
+/* 모바일 카드 탭 */
+.mobile-card-tap {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+.mobile-card-tap:active {
+  transform: scale(0.92);
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.6), 0 0 6px rgba(212,175,55,0.3);
+}
 
 /* ===== Arcana 통합 디자인 시스템 ===== */
 
@@ -374,6 +391,33 @@ body {
 }
 .arcana-question-btn:active {
   transform: scale(0.98);
+}
+
+/* ===== 성능 최적화 ===== */
+
+/* 저사양 기기: 무거운 애니메이션 제거 */
+@media (prefers-reduced-motion: reduce) {
+  .slot-empty { animation: none; border-color: rgba(139, 92, 246, 0.35); }
+  .card-land { animation: none; }
+  .deck-card-hover { transition: none; }
+  .deck-card-picking { transition: none; }
+  .deck-card-picked { transition: opacity 0.15s ease !important; }
+  .arcana-btn, .arcana-btn-ghost, .arcana-panel-hover { transition: none; }
+  .space-bg::before { display: none; }
+}
+
+/* 모바일: backdrop-filter 비용 절감 */
+@media (max-width: 767px) {
+  .arcana-panel { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .arcana-btn { backdrop-filter: none; }
+  .arcana-btn-ghost { backdrop-filter: none; }
+  /* 그림자 단순화 */
+  .arcana-panel {
+    box-shadow: 0 0 16px rgba(139, 92, 246, 0.06);
+  }
+  .deck-card-picking {
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.6) !important;
+  }
 }
 
 /* ===== 타로 해석 결과 마크다운 스타일 ===== */
