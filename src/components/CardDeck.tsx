@@ -65,6 +65,7 @@ export default function CardDeck({
   const [pickingIndex, setPickingIndex] = useState<number | null>(null);
   const [landingSlot, setLandingSlot] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [viewportW, setViewportW] = useState(375);
   const proceedRef = useRef<HTMLDivElement>(null);
   const fanWrapRef = useRef<HTMLDivElement>(null);
   const [measuredFanH, setMeasuredFanH] = useState<number | null>(null);
@@ -72,7 +73,10 @@ export default function CardDeck({
   const selectionComplete = selections.length >= requiredCount;
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
+    const check = () => {
+      setIsMobile(window.innerWidth < 768);
+      setViewportW(window.innerWidth);
+    };
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
@@ -101,7 +105,12 @@ export default function CardDeck({
     }
   }, [selectionComplete, measuredFanH]);
 
-  const slotFanW = Math.max((requiredCount - 1) * SLOT_OVERLAP + SLOT_CW + SLOT_PAD * 2, 120);
+  // 가용 너비에 맞게 슬롯 간격을 자동 축소
+  const slotAvailW = viewportW - 32; // px-4 양쪽
+  const slotOverlap = requiredCount > 1
+    ? Math.min(SLOT_OVERLAP, Math.floor((slotAvailW - SLOT_CW - SLOT_PAD * 2) / (requiredCount - 1)))
+    : SLOT_OVERLAP;
+  const slotFanW = Math.max((requiredCount - 1) * slotOverlap + SLOT_CW + SLOT_PAD * 2, 120);
   const slotFanH = SLOT_CH + 12;
 
   return (
@@ -117,7 +126,7 @@ export default function CardDeck({
             const t = requiredCount > 1 ? i / (requiredCount - 1) : 0.5;
             const tCentered = t - 0.5;
             const tilt = tCentered * SLOT_MAX_ROT;
-            const x = SLOT_PAD + i * SLOT_OVERLAP;
+            const x = SLOT_PAD + i * slotOverlap;
             const arcY = Math.abs(tCentered) * 8;
             return (
               <div

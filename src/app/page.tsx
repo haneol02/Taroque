@@ -556,7 +556,10 @@ export default function Home() {
             {/* 선택된 카드들 - 팬 배치 */}
             {(() => {
               const N = selectedCardSelections.length;
-              const CW = 72, CH = 108, OVL = 56, PAD = 30, MAX_ROT = 16;
+              const CW = 72, CH = 108, PAD = 30, MAX_ROT = 16;
+              // 가용 너비에 맞게 겹침 자동 축소 (px-6 양쪽 = 48px)
+              const availW = typeof window !== 'undefined' ? window.innerWidth - 48 : 600;
+              const OVL = N > 1 ? Math.min(56, Math.floor((availW - CW - PAD * 2) / (N - 1))) : 56;
               const fanW = Math.max((N - 1) * OVL + CW + PAD * 2, CW + PAD * 2);
               const fanH = CH + 8;
               return (
