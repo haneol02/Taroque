@@ -26,19 +26,17 @@ const FAN_SAG = 90;        // 오른쪽 끝의 최대 상승 높이
 const FAN_CONTAINER_H = 290; // fallback
 
 // ── 모바일 원형 휠 파라미터
-const MW = 80;    // 카드 너비
-const MH = 134;   // 카드 높이 (3:5 비율)
-const WR = 460;   // 휠 반지름
-const WCH = 310;  // fallback 컨테이너 높이
-// cy = WR + MH/2 → 맨 위 카드의 top이 컨테이너 y=0에 정확히 맞음
-const WCY = WR + Math.round(MH / 2); // 527
+const MW = 92;    // 카드 너비 (더 크게)
+const MH = 154;   // 카드 높이 3:5 비율
+const WCH = 310;  // fallback 컨테이너 높이 (ResizeObserver가 실제값으로 교체)
+// WR, cy는 containerH로 동적 계산 (하단 고정 아치)
 
 // ── 선택 슬롯 팬 파라미터
 const SLOT_CW = 52;
 const SLOT_CH = 78;
-const SLOT_OVERLAP = 44;
-const SLOT_MAX_ROT = 12;
-const SLOT_PAD = 24;
+const SLOT_OVERLAP = 38;  // 겹침 줄여 카드 간격 확보
+const SLOT_MAX_ROT = 10;
+const SLOT_PAD = 20;
 
 function getCardFanStyle(index: number, total: number, containerH: number = FAN_CONTAINER_H) {
   const t = index / (total - 1);
@@ -110,7 +108,7 @@ export default function CardDeck({
     <div className="w-full h-full flex flex-col items-center gap-3">
 
       {/* ── 선택 슬롯 (팬 배치) ── */}
-      <div className="shrink-0 flex justify-center px-4">
+      <div className="shrink-0 flex flex-col items-center gap-1.5 px-4">
         <div className="relative" style={{ width: `${slotFanW}px`, height: `${slotFanH}px` }}>
           {positions.map((pos, i) => {
             const sel = selections[i];
@@ -162,6 +160,19 @@ export default function CardDeck({
             );
           })}
         </div>
+
+        {/* 선택된 카드 이름 요약 */}
+        {selections.length > 0 && (
+          <p className="text-[11px] text-center leading-relaxed" style={{ color: 'rgba(185,200,225,0.72)', maxWidth: `${slotFanW + 40}px` }}>
+            {selections.map((sel, i) => (
+              <span key={i}>
+                {i > 0 && <span style={{ color: 'rgba(212,175,55,0.3)' }}> · </span>}
+                <span>{cards[sel.cardIndex].name}</span>
+                {sel.isReversed && <span style={{ color: 'rgba(248,113,113,0.6)' }}>↑</span>}
+              </span>
+            ))}
+          </p>
+        )}
       </div>
 
       {/* ── 진행 표시 ── */}
@@ -324,6 +335,8 @@ function MobileCardWheel({
     moved: boolean;
   } | null>(null);
   const rafRef = useRef<number | null>(null);
+  // 터치 핸들러에서 최신 wr을 참조하기 위한 ref
+  const wrRef = useRef<number>(300);
 
   // 컨테이너 너비 감지
   useEffect(() => {
@@ -367,7 +380,7 @@ function MobileCardWheel({
     // 지수이동평균으로 속도 스무딩
     dragRef.current.velocity = dragRef.current.velocity * 0.65 + dx * 0.35;
     dragRef.current.lastX = x;
-    const dRot = (dx / WR) * (180 / Math.PI);
+    const dRot = (dx / wrRef.current) * (180 / Math.PI);
     setRotation(r => r + dRot);
   };
 
@@ -383,7 +396,7 @@ function MobileCardWheel({
     const decay = () => {
       vel *= 0.935;
       if (Math.abs(vel) < 0.12) return;
-      const dRot = (vel / WR) * (180 / Math.PI);
+      const dRot = (vel / wrRef.current) * (180 / Math.PI);
       setRotation(r => r + dRot);
       rafRef.current = requestAnimationFrame(decay);
     };
@@ -393,7 +406,11 @@ function MobileCardWheel({
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
 
   const cx = containerW / 2;
-  const cy = WCY; // WR + MH/2 = 527 → 맨 위 카드 top이 y=0
+  // 하단 고정 아치: 원 중심이 화면 위쪽에, 카드가 화면 아래쪽에 모임
+  // wr = 컨테이너 높이의 82%, 하단에 카드가 붙도록 cyB 계산
+  const wr = Math.max(150, Math.min(420, containerH * 0.82));
+  wrRef.current = wr;
+  const cyB = containerH - Math.round(MH / 2) - Math.round(wr);
   const n = shuffledIndices.length;
   const angStep = 360 / n;
 
@@ -407,17 +424,17 @@ function MobileCardWheel({
     >
       {shuffledIndices.map((cardIndex, i) => {
         const angleDeg = ((rotation + i * angStep) % 360 + 360) % 360;
-        // 0 = 상단 중앙, +값 = 오른쪽, -값 = 왼쪽
+        // 0 = 하단 중앙, 양수 = 오른쪽, 음수 = 왼쪽
         const normAngle = angleDeg > 180 ? angleDeg - 360 : angleDeg;
-        const distFromTop = Math.abs(normAngle);
+        const distFromCenter = Math.abs(normAngle);
 
         // 시야 밖 카드 스킵 (성능)
-        if (distFromTop > 72) return null;
+        if (distFromCenter > 70) return null;
 
         const rad = (angleDeg * Math.PI) / 180;
-        // 원형 상단 아치: 중앙이 상단, 측면이 아래로 내려감
-        const x = cx + WR * Math.sin(rad);
-        const y = cy - WR * Math.cos(rad);
+        // 하단 아치: 중앙이 하단에, 측면이 위로 올라감
+        const x = cx + wr * Math.sin(rad);
+        const y = cyB + wr * Math.cos(rad);
 
         if (y - MH / 2 > containerH || y + MH / 2 < 0) return null;
 
@@ -425,11 +442,11 @@ function MobileCardWheel({
         const dimmed = isDimmed(cardIndex);
         const picking = pickingIndex === cardIndex;
 
-        const t = Math.min(distFromTop / 65, 1);
-        const scale = 1 - t * 0.22;
-        const alpha = selected ? 0 : dimmed ? 0.15 : 1 - t * 0.4;
-        // 원의 접선 방향으로 카드 기울기
-        const tilt = normAngle * 0.88;
+        const t = Math.min(distFromCenter / 62, 1);
+        const scale = 1 - t * 0.18;
+        const alpha = selected ? 0 : dimmed ? 0.15 : 1 - t * 0.38;
+        // 하단 아치 접선 방향: 왼쪽 카드는 우측으로, 오른쪽은 좌측으로
+        const tilt = -normAngle * 0.85;
 
         return (
           <button
@@ -447,7 +464,7 @@ function MobileCardWheel({
               height: `${MH}px`,
               transform: `rotate(${tilt}deg) scale(${scale})${picking ? ' translateY(-60px) scale(1.15)' : ''}`,
               opacity: alpha,
-              zIndex: Math.round(100 - distFromTop),
+              zIndex: Math.round(100 - distFromCenter),
               transition: picking
                 ? 'transform 0.15s ease-out, opacity 0.15s'
                 : 'opacity 0.2s ease',
