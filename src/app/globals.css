@@ -399,7 +399,8 @@ body {
   border-color: rgba(196,181,253,0.5);
   box-shadow: 0 0 0 2px rgba(139,92,246,0.14), 0 0 16px rgba(139,92,246,0.12);
 }
-.arcana-input::placeholder { color: rgba(180,165,220,0.38); }
+.arcana-input::placeholder { color: rgba(180,165,220,0.55); }
+textarea::placeholder { color: rgba(180,165,220,0.52); }
 
 /* 구분선 */
 .arcana-divider {
@@ -411,13 +412,13 @@ body {
 
 /* 뒤로 가기 버튼 */
 .arcana-back {
-  color: rgba(218,175,60,0.55);
+  color: rgba(218,175,60,0.75);
   transition: color 0.22s ease;
   letter-spacing: 0.08em;
   font-size: 0.78rem;
   font-family: var(--font-noto-serif-kr), inherit;
 }
-.arcana-back:hover { color: rgba(218,175,60,0.88); }
+.arcana-back:hover { color: rgba(218,175,60,0.96); }
 
 /* 섹션 타이틀 */
 .arcana-title {
@@ -507,7 +508,7 @@ body {
 
 .interpretation-content p {
   @apply mb-4;
-  color: rgba(218,225,242,0.85);
+  color: rgba(218,225,242,0.93);
 }
 
 .interpretation-content ul {
@@ -516,7 +517,7 @@ body {
 
 .interpretation-content li {
   @apply ml-4 relative;
-  color: rgba(218,225,242,0.82);
+  color: rgba(218,225,242,0.9);
 }
 
 .interpretation-content li::before {

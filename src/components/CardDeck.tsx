@@ -151,7 +151,7 @@ export default function CardDeck({
                   <div className="w-full h-full flex items-center justify-center rounded-lg slot-empty"
                     style={{ background: 'rgba(139,92,246,0.04)' }}>
                     <span className="text-sm font-light"
-                      style={{ color: 'rgba(196,181,253,0.3)', fontFamily: 'Georgia, serif' }}>
+                      style={{ color: 'rgba(196,181,253,0.55)', fontFamily: 'Georgia, serif' }}>
                       {i + 1}
                     </span>
                   </div>
@@ -163,10 +163,10 @@ export default function CardDeck({
 
         {/* 선택된 카드 이름 요약 */}
         {selections.length > 0 && (
-          <p className="text-[11px] text-center leading-relaxed" style={{ color: 'rgba(185,200,225,0.72)', maxWidth: `${slotFanW + 40}px` }}>
+          <p className="text-[11px] text-center leading-relaxed" style={{ color: 'rgba(185,200,225,0.9)', maxWidth: `${slotFanW + 40}px` }}>
             {selections.map((sel, i) => (
               <span key={i}>
-                {i > 0 && <span style={{ color: 'rgba(212,175,55,0.3)' }}> · </span>}
+                {i > 0 && <span style={{ color: 'rgba(212,175,55,0.55)' }}> · </span>}
                 <span>{cards[sel.cardIndex].name}</span>
                 {sel.isReversed && <span style={{ color: 'rgba(248,113,113,0.6)' }}>↑</span>}
               </span>
@@ -178,11 +178,11 @@ export default function CardDeck({
       {/* ── 진행 표시 ── */}
       {!selectionComplete && (
         <div className="shrink-0 flex items-center gap-2">
-          <span style={{ color: 'rgba(212,175,55,0.4)' }} className="text-sm">⟡</span>
-          <span className="text-sm tracking-widest" style={{ color: 'rgba(210,195,255,0.72)' }}>
+          <span style={{ color: 'rgba(212,175,55,0.65)' }} className="text-sm">⟡</span>
+          <span className="text-sm tracking-widest" style={{ color: 'rgba(210,195,255,0.9)' }}>
             {selections.length} / {requiredCount} 선택됨
           </span>
-          <span style={{ color: 'rgba(212,175,55,0.4)' }} className="text-sm">⟡</span>
+          <span style={{ color: 'rgba(212,175,55,0.65)' }} className="text-sm">⟡</span>
         </div>
       )}
 
@@ -218,7 +218,7 @@ export default function CardDeck({
       </div>
 
       {!selectionComplete && (
-        <p className="shrink-0 text-xs tracking-widest" style={{ color: 'rgba(185,200,225,0.45)' }}>
+        <p className="shrink-0 text-xs tracking-widest" style={{ color: 'rgba(185,200,225,0.7)' }}>
           ✦ &nbsp; {isMobile ? '좌우로 돌려 카드를 탐색하고, 탭하여 선택하세요' : '카드를 선택하면 자동으로 다음 자리로 올라갑니다'} &nbsp; ✦
         </p>
       )}
