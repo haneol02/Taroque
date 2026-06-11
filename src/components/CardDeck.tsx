@@ -256,31 +256,40 @@ function MobileCardGrid({
   pickingIndex: number | null;
 }) {
   return (
-    <div className="w-full overflow-y-auto mobile-card-scroll px-3" style={{ maxHeight: '52vh' }}>
-      <div className="grid grid-cols-4 gap-2">
-        {shuffledIndices.map((cardIndex, displayIndex) => {
-          const selected = isSelected(cardIndex);
-          const dimmed = isDimmed(cardIndex);
-          const picking = pickingIndex === cardIndex;
+    <div className="w-full px-3 relative">
+      {/* 스크롤 힌트 그라디언트 */}
+      <div className="absolute bottom-0 left-3 right-3 h-10 pointer-events-none z-10 rounded-b-2xl"
+        style={{ background: 'linear-gradient(to top, rgba(26,20,58,0.9), transparent)' }} />
 
-          return (
-            <button
-              key={displayIndex}
-              onClick={() => onCardClick(cardIndex)}
-              disabled={dimmed || selected}
-              aria-label={`카드 ${displayIndex + 1}`}
-              className={`relative rounded-lg focus:outline-none
-                ${picking ? 'deck-card-picking' : ''}
-                ${selected ? 'deck-card-picked' : ''}
-                ${dimmed ? 'deck-card-dimmed' : ''}
-                ${!selected && !dimmed && !picking ? 'mobile-card-tap' : ''}
-              `}
-              style={{ aspectRatio: '3 / 5' }}
-            >
-              <MobileCardBack />
-            </button>
-          );
-        })}
+      <div
+        className="arcana-panel rounded-2xl p-3 overflow-y-auto mobile-card-scroll"
+        style={{ maxHeight: '54vh' }}
+      >
+        <div className="grid grid-cols-3 gap-2">
+          {shuffledIndices.map((cardIndex, displayIndex) => {
+            const selected = isSelected(cardIndex);
+            const dimmed = isDimmed(cardIndex);
+            const picking = pickingIndex === cardIndex;
+
+            return (
+              <button
+                key={displayIndex}
+                onClick={() => onCardClick(cardIndex)}
+                disabled={dimmed || selected}
+                aria-label={`카드 ${displayIndex + 1}`}
+                className={`relative rounded-xl focus:outline-none overflow-hidden
+                  ${picking ? 'deck-card-picking' : ''}
+                  ${selected ? 'deck-card-picked' : ''}
+                  ${dimmed ? 'deck-card-dimmed' : ''}
+                  ${!selected && !dimmed && !picking ? 'mobile-card-tap' : ''}
+                `}
+                style={{ aspectRatio: '3 / 5' }}
+              >
+                <MobileCardBack />
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

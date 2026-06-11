@@ -18,12 +18,10 @@ function ArcanaLoader({ message }: { message: string }) {
   return (
     <div className="min-h-screen space-bg flex items-center justify-center select-none">
       <div className="text-center relative z-10">
-        <div className="mb-6 relative">
-          <div className="absolute inset-0 rounded-full animate-ping"
-            style={{ background: 'rgba(139,92,246,0.15)', animationDuration: '2s' }} />
+        <div className="mb-6 flex items-center justify-center">
           <Image src="/logo.png" alt="loading" width={56} height={56}
-            className="w-14 h-14 mx-auto animate-spin relative z-10"
-            style={{ filter: 'drop-shadow(0 0 12px rgba(196,181,253,0.8)) drop-shadow(0 0 24px rgba(196,181,253,0.5))' }}
+            className="w-14 h-14 animate-spin"
+            style={{ filter: 'drop-shadow(0 0 12px rgba(196,181,253,0.8)) drop-shadow(0 0 24px rgba(210,195,255,0.72))' }}
           />
         </div>
         <p className="arcana-title text-lg font-light text-white mb-2">{message}</p>
@@ -224,7 +222,7 @@ export default function Home() {
               <p className="text-xl font-light mb-2" style={{ color: 'rgba(212,175,55,0.8)', letterSpacing: '0.1em' }}>
                 마음의 답을 찾아드려요
               </p>
-              <p className="text-sm leading-relaxed" style={{ color: 'rgba(196,181,253,0.5)', letterSpacing: '0.06em' }}>
+              <p className="text-sm leading-relaxed" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.06em' }}>
                 고민을 자유롭게 털어놓으세요. 타로와 사주를 통해 답해드립니다.
               </p>
             </div>
@@ -250,7 +248,7 @@ export default function Home() {
                   <div className="text-2xl mb-3" style={{ color: 'rgba(212,175,55,0.6)' }}>{item.icon}</div>
                   <h3 className="text-sm font-medium text-white mb-2 tracking-wider">{item.title}</h3>
                   <p className="text-xs leading-relaxed whitespace-pre-line"
-                    style={{ color: 'rgba(148,163,184,0.6)' }}>{item.desc}</p>
+                    style={{ color: 'rgba(185,200,225,0.75)' }}>{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -281,7 +279,7 @@ export default function Home() {
             <div className="text-center mb-10">
               <h1 className="arcana-title text-3xl font-light text-white mb-3">어떤 상담을 원하시나요</h1>
               <div className="arcana-divider mx-auto mb-4" />
-              <p className="text-sm" style={{ color: 'rgba(196,181,253,0.5)', letterSpacing: '0.08em' }}>
+              <p className="text-sm" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.08em' }}>
                 타로와 사주 중 원하시는 방법을 선택하세요
               </p>
             </div>
@@ -294,10 +292,10 @@ export default function Home() {
               >
                 <div className="text-4xl mb-4" style={{ color: 'rgba(212,175,55,0.7)' }}>☽</div>
                 <h2 className="arcana-title text-xl font-light text-white mb-3 tracking-wider">타로</h2>
-                <p className="text-sm leading-relaxed mb-5" style={{ color: 'rgba(148,163,184,0.7)' }}>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: 'rgba(185,200,225,0.85)' }}>
                   직관적인 카드를 통해<br />현재 상황과 미래를 살펴봅니다
                 </p>
-                <div className="space-y-1.5 text-xs" style={{ color: 'rgba(196,181,253,0.5)' }}>
+                <div className="space-y-1.5 text-xs" style={{ color: 'rgba(210,195,255,0.72)' }}>
                   <p>✦ 빠른 상담 (5–10분)</p>
                   <p>✦ 구체적인 질문에 적합</p>
                   <p>✦ 현재 상황 중심 해석</p>
@@ -311,10 +309,10 @@ export default function Home() {
               >
                 <div className="text-4xl mb-4" style={{ color: 'rgba(212,175,55,0.7)' }}>☀</div>
                 <h2 className="arcana-title text-xl font-light text-white mb-3 tracking-wider">사주</h2>
-                <p className="text-sm leading-relaxed mb-5" style={{ color: 'rgba(148,163,184,0.7)' }}>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: 'rgba(185,200,225,0.85)' }}>
                   생년월일시를 기반으로<br />운명과 운세를 깊이 분석합니다
                 </p>
-                <div className="space-y-1.5 text-xs" style={{ color: 'rgba(196,181,253,0.5)' }}>
+                <div className="space-y-1.5 text-xs" style={{ color: 'rgba(210,195,255,0.72)' }}>
                   <p>✦ 종합 상담 (10–15분)</p>
                   <p>✦ 인생 전반적인 조언</p>
                   <p>✦ 장기적 운세 파악</p>
@@ -336,7 +334,7 @@ export default function Home() {
             <div className="text-center mb-10">
               <h1 className="arcana-title text-3xl font-light text-white mb-3">어떤 고민이 있으신가요</h1>
               <div className="arcana-divider mx-auto mb-3" />
-              <p className="text-sm" style={{ color: 'rgba(196,181,253,0.5)', letterSpacing: '0.06em' }}>
+              <p className="text-sm" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.06em' }}>
                 마음을 털어놓으세요. 비밀은 보장됩니다.
               </p>
             </div>
@@ -352,7 +350,7 @@ export default function Home() {
                   maxLength={500}
                 />
                 <div className="flex justify-end pt-3 border-t" style={{ borderColor: 'rgba(212,175,55,0.1)' }}>
-                  <span className="text-xs" style={{ color: 'rgba(148,163,184,0.4)' }}>{question.length} / 500</span>
+                  <span className="text-xs" style={{ color: 'rgba(185,200,225,0.55)' }}>{question.length} / 500</span>
                 </div>
               </div>
               <button type="submit" disabled={!question.trim() || isLoadingChat}
@@ -383,7 +381,7 @@ export default function Home() {
                     {exampleQuestions[cat.key].map((q, i) => (
                       <button key={i} onClick={() => handleExampleClick(q)}
                         className="arcana-question-btn rounded-lg px-3 py-2.5 text-xs leading-relaxed"
-                        style={{ color: 'rgba(148,163,184,0.75)' }}>
+                        style={{ color: 'rgba(185,200,225,0.88)' }}>
                         {q}
                       </button>
                     ))}
@@ -406,7 +404,7 @@ export default function Home() {
               <h1 className="arcana-title text-3xl md:text-4xl font-light text-white mb-2">
                 {cardCount}장의 카드를 뽑아 올리세요
               </h1>
-              <p className="text-sm tracking-widest" style={{ color: 'rgba(196,181,253,0.5)', letterSpacing: '0.12em' }}>
+              <p className="text-sm tracking-widest" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.12em' }}>
                 마음이 끌리는 카드에 손을 얹듯 선택해보세요
               </p>
             </div>
@@ -433,7 +431,7 @@ export default function Home() {
             <div className="text-center mb-10">
               <h1 className="arcana-title text-3xl font-light text-white mb-3">사주 상담</h1>
               <div className="arcana-divider mx-auto mb-3" />
-              <p className="text-sm" style={{ color: 'rgba(196,181,253,0.5)', letterSpacing: '0.06em' }}>
+              <p className="text-sm" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.06em' }}>
                 생년월일시와 궁금한 점을 알려주세요
               </p>
             </div>
@@ -451,7 +449,7 @@ export default function Home() {
                   maxLength={500}
                 />
                 <div className="flex justify-end pt-3 border-t" style={{ borderColor: 'rgba(212,175,55,0.1)' }}>
-                  <span className="text-xs" style={{ color: 'rgba(148,163,184,0.4)' }}>{question.length} / 500</span>
+                  <span className="text-xs" style={{ color: 'rgba(185,200,225,0.55)' }}>{question.length} / 500</span>
                 </div>
               </div>
               <button type="submit" disabled={!question.trim() || !sajuInfo || isLoadingSaju}
@@ -481,7 +479,7 @@ export default function Home() {
                     {sajuExampleQuestions[cat.key].map((q, i) => (
                       <button key={i} onClick={() => handleExampleClick(q)}
                         className="arcana-question-btn rounded-lg px-3 py-2.5 text-xs leading-relaxed"
-                        style={{ color: 'rgba(148,163,184,0.75)' }}>
+                        style={{ color: 'rgba(185,200,225,0.88)' }}>
                         {q}
                       </button>
                     ))}
@@ -504,7 +502,7 @@ export default function Home() {
               <h1 className="arcana-title text-3xl font-light text-white mb-4">사주 풀이 결과</h1>
               <div className="arcana-divider mx-auto mb-6" />
               <div className="arcana-panel rounded-xl p-5 max-w-2xl mx-auto">
-                <p className="text-sm leading-relaxed" style={{ color: 'rgba(148,163,184,0.8)' }}>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(210,220,240,0.9)' }}>
                   <span className="text-white font-medium">질문 &nbsp;✦&nbsp; </span>{question}
                 </p>
                 {sajuInfo && (
@@ -545,7 +543,7 @@ export default function Home() {
               <h1 className="arcana-title text-3xl font-light text-white mb-4">리딩 결과</h1>
               <div className="arcana-divider mx-auto mb-6" />
               <div className="arcana-panel rounded-xl p-5 max-w-2xl mx-auto">
-                <p className="text-sm leading-relaxed" style={{ color: 'rgba(148,163,184,0.8)' }}>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(210,220,240,0.9)' }}>
                   <span className="text-white font-medium">질문 &nbsp;✦&nbsp; </span>{question}
                 </p>
               </div>
@@ -565,7 +563,7 @@ export default function Home() {
                     </p>
                     {cardInfo && (
                       <p className="text-xs mt-2 text-center leading-relaxed"
-                        style={{ color: 'rgba(148,163,184,0.55)' }}>
+                        style={{ color: 'rgba(185,200,225,0.7)' }}>
                         {card.isReversed ? cardInfo.reversedMeaning : cardInfo.uprightMeaning}
                       </p>
                     )}
