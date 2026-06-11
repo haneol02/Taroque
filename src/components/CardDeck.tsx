@@ -28,8 +28,10 @@ const FAN_CONTAINER_H = 260;
 // ── 모바일 휠 파라미터
 const MW = 58;    // 카드 너비
 const MH = 97;    // 카드 높이
-const WR = 520;   // 휠 반지름
-const WCH = 280;  // 컨테이너 높이 (center_y = WCH + 240 = 520 = WR → 맨 위 카드 y=0)
+const WR = 500;   // 휠 반지름
+const WCH = 320;  // 컨테이너 높이
+// cy = WR + MH/2 : 맨 위 카드 top이 컨테이너 y=0에 정확히 맞음
+const WCY = WR + Math.round(MH / 2);
 
 function getCardFanStyle(index: number, total: number) {
   const t = index / (total - 1);
@@ -154,7 +156,7 @@ export default function CardDeck({
         <div
           className="w-full overflow-hidden"
           style={{
-            maxHeight: selectionComplete ? '0px' : `${WCH + 24}px`,
+            maxHeight: selectionComplete ? '0px' : `${WCH + 20}px`,
             opacity: selectionComplete ? 0 : 1,
             transition: 'max-height 0.6s ease-in-out, opacity 0.5s ease',
           }}
@@ -346,7 +348,7 @@ function MobileCardWheel({
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
 
   const cx = containerW / 2;
-  const cy = WCH + 240; // center below container; WR=520 so top card is at y≈0
+  const cy = WCY; // WR + MH/2 → 맨 위 카드 top이 컨테이너 y=0에 정확히 맞음
   const n = shuffledIndices.length;
   const angStep = 360 / n;
 
@@ -365,14 +367,15 @@ function MobileCardWheel({
         const normAngle = angleDeg > 180 ? angleDeg - 360 : angleDeg;
         const distFromTop = Math.abs(normAngle);
 
-        // 시야 밖 카드는 렌더 스킵 (성능)
-        if (distFromTop > 88) return null;
+        // 시야 밖 카드 스킵 (성능)
+        if (distFromTop > 75) return null;
 
         const rad = (angleDeg * Math.PI) / 180;
         const x = cx + WR * Math.sin(rad);
         const y = cy - WR * Math.cos(rad);
 
-        if (y > WCH + MH) return null;
+        // 컨테이너 밖이면 스킵
+        if (y - MH / 2 > WCH || y + MH / 2 < 0) return null;
 
         const selected = isSelected(cardIndex);
         const dimmed = isDimmed(cardIndex);
@@ -420,12 +423,12 @@ function MobileCardWheel({
 
       {/* 사이드 페이드 */}
       <div className="absolute inset-y-0 left-0 w-16 pointer-events-none"
-        style={{ background: 'linear-gradient(to right, rgba(24,20,74,1) 30%, transparent)' }} />
+        style={{ background: 'linear-gradient(to right, rgba(16,14,48,1) 30%, transparent)' }} />
       <div className="absolute inset-y-0 right-0 w-16 pointer-events-none"
-        style={{ background: 'linear-gradient(to left, rgba(24,20,74,1) 30%, transparent)' }} />
+        style={{ background: 'linear-gradient(to left, rgba(16,14,48,1) 30%, transparent)' }} />
       {/* 하단 페이드 */}
       <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none"
-        style={{ background: 'linear-gradient(to top, rgba(24,20,74,1), transparent)' }} />
+        style={{ background: 'linear-gradient(to top, rgba(16,14,48,1), transparent)' }} />
     </div>
   );
 }
