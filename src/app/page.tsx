@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { marked } from 'marked';
 import { CardSelection, ExampleQuestions } from '@/types/tarot';
 import { cardPositions, tarotCards, exampleQuestions } from '@/lib/tarot-data';
-import TarotCard from '@/components/TarotCard';
 import CardDeck from '@/components/CardDeck';
 import SajuInput from '@/components/SajuInput';
 import { SajuInfo, SajuExampleQuestions } from '@/types/tarot';
@@ -209,20 +208,22 @@ export default function Home() {
             <div className="mb-8">
               <div className="relative inline-block mb-5">
                 <div className="absolute inset-0 rounded-full blur-2xl"
-                  style={{ background: 'rgba(139,92,246,0.25)', transform: 'scale(2)' }} />
-                <Image src="/logo.png" alt="Taroque" width={60} height={60}
-                  className="w-15 h-15 relative z-10"
-                  style={{ filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.6)) drop-shadow(0 0 24px rgba(196,181,253,0.4))' }}
+                  style={{ background: 'rgba(139,92,246,0.35)', transform: 'scale(2.5)' }} />
+                <div className="absolute inset-0 rounded-full blur-3xl"
+                  style={{ background: 'rgba(212,175,55,0.18)', transform: 'scale(3.5)' }} />
+                <Image src="/logo.png" alt="Taroque" width={80} height={80}
+                  className="w-16 h-16 md:w-20 md:h-20 relative z-10"
+                  style={{ filter: 'drop-shadow(0 0 16px rgba(212,175,55,0.7)) drop-shadow(0 0 32px rgba(196,181,253,0.55))' }}
                 />
               </div>
-              <h1 className="arcana-title text-6xl md:text-7xl font-light text-white mb-3 tracking-widest">
+              <h1 className="arcana-title text-4xl md:text-6xl lg:text-7xl font-light text-white mb-3 tracking-widest">
                 TAROQUE
               </h1>
-              <div className="arcana-divider mx-auto mb-5" />
-              <p className="text-xl font-light mb-2" style={{ color: 'rgba(212,175,55,0.8)', letterSpacing: '0.1em' }}>
+              <div className="arcana-divider mx-auto mb-4" />
+              <p className="text-base md:text-xl font-light mb-2" style={{ color: 'rgba(212,175,55,0.8)', letterSpacing: '0.1em' }}>
                 마음의 답을 찾아드려요
               </p>
-              <p className="text-sm leading-relaxed" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.06em' }}>
+              <p className="text-xs md:text-sm leading-relaxed" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.06em' }}>
                 고민을 자유롭게 털어놓으세요. 타로와 사주를 통해 답해드립니다.
               </p>
             </div>
@@ -398,24 +399,26 @@ export default function Home() {
     if (currentPage === 'select-cards') {
       if (isAnalyzing) return <ArcanaLoader message="고민을 분석하고 있어요" />;
       return (
-        <div className="min-h-screen space-bg select-none flex flex-col">
-          <div className="relative z-10 flex flex-col items-center justify-center flex-1 py-10 gap-6">
-            <div className="text-center px-6">
-              <h1 className="arcana-title text-3xl md:text-4xl font-light text-white mb-2">
+        <div className="h-[100dvh] overflow-hidden space-bg select-none flex flex-col">
+          <div className="relative z-10 flex flex-col items-center h-full py-4 gap-3 overflow-hidden">
+            <div className="text-center px-6 shrink-0">
+              <h1 className="arcana-title text-3xl md:text-4xl font-light text-white mb-1">
                 {cardCount}장의 카드를 뽑아 올리세요
               </h1>
               <p className="text-sm tracking-widest" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.12em' }}>
                 마음이 끌리는 카드에 손을 얹듯 선택해보세요
               </p>
             </div>
-            <CardDeck
-              shuffledIndices={shuffledCardIndices}
-              cards={tarotCards}
-              requiredCount={cardCount}
-              positions={positions}
-              onProceed={handleCardSelectionComplete}
-              isProceedLoading={isProceedLoading}
-            />
+            <div className="flex-1 min-h-0 w-full overflow-hidden">
+              <CardDeck
+                shuffledIndices={shuffledCardIndices}
+                cards={tarotCards}
+                requiredCount={cardCount}
+                positions={positions}
+                onProceed={handleCardSelectionComplete}
+                isProceedLoading={isProceedLoading}
+              />
+            </div>
           </div>
         </div>
       );
@@ -549,28 +552,67 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 선택된 카드들 */}
-            <div className="flex justify-center flex-wrap gap-5 mb-10">
-              {selectedCardSelections.map((card, index) => {
-                const cardInfo = getCardInfo(card.cardId);
-                return (
-                  <div key={index} className="arcana-panel rounded-xl p-4 flex flex-col items-center w-40">
-                    <p className="text-xs font-medium tracking-wider mb-3 text-center"
-                      style={{ color: 'rgba(212,175,55,0.7)' }}>{card.position}</p>
-                    <TarotCard card={cardInfo} isRevealed={true} isReversed={card.isReversed} className="w-24 mb-3" />
-                    <p className="text-xs text-white text-center font-medium leading-tight">
-                      {cardInfo?.name} {card.isReversed ? <span style={{ color: 'rgba(248,113,113,0.7)' }}>(역)</span> : ''}
-                    </p>
-                    {cardInfo && (
-                      <p className="text-xs mt-2 text-center leading-relaxed"
-                        style={{ color: 'rgba(185,200,225,0.7)' }}>
-                        {card.isReversed ? cardInfo.reversedMeaning : cardInfo.uprightMeaning}
-                      </p>
-                    )}
+            {/* 선택된 카드들 - 팬 배치 */}
+            {(() => {
+              const N = selectedCardSelections.length;
+              const CW = 72, CH = 108, OVL = 56, PAD = 30, MAX_ROT = 16;
+              const fanW = Math.max((N - 1) * OVL + CW + PAD * 2, CW + PAD * 2);
+              const fanH = CH + 48;
+              return (
+                <div className="flex justify-center mb-10">
+                  <div className="relative" style={{ width: `${fanW}px`, height: `${fanH}px` }}>
+                    {selectedCardSelections.map((card, index) => {
+                      const cardInfo = getCardInfo(card.cardId);
+                      const t = N > 1 ? index / (N - 1) : 0.5;
+                      const tCentered = t - 0.5;
+                      const tilt = tCentered * MAX_ROT;
+                      const x = PAD + index * OVL;
+                      const arcY = Math.abs(tCentered) * 10;
+                      return (
+                        <div
+                          key={index}
+                          className="absolute result-card-enter"
+                          style={{
+                            left: `${x}px`,
+                            top: `${arcY}px`,
+                            width: `${CW}px`,
+                            height: `${CH + 38}px`,
+                            transform: `rotate(${tilt}deg)`,
+                            transformOrigin: '50% 100%',
+                            zIndex: 10 + index,
+                            '--delay': `${index * 110}ms`,
+                            '--card-rot': `${tilt}deg`,
+                          } as React.CSSProperties}
+                        >
+                          <div className="rounded-xl overflow-hidden border-2"
+                            style={{
+                              width: `${CW}px`,
+                              height: `${CH}px`,
+                              borderColor: 'rgba(212,175,55,0.55)',
+                              boxShadow: '0 6px 24px rgba(0,0,0,0.55)',
+                            }}>
+                            {cardInfo && (
+                              <div className={`w-full h-full relative ${card.isReversed ? 'rotate-180' : ''}`}>
+                                <Image src={cardInfo.imageUrl} alt={cardInfo.name} fill sizes="72px" className="object-contain" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-center mt-1.5"
+                            style={{ transform: `rotate(${-tilt * 0.55}deg)` }}>
+                            <p className="text-[10px] tracking-wide leading-tight"
+                              style={{ color: 'rgba(212,175,55,0.75)' }}>{card.position}</p>
+                            <p className="text-[10px] text-white leading-tight font-medium mt-0.5">
+                              {cardInfo?.name}
+                              {card.isReversed && <span style={{ color: 'rgba(248,113,113,0.7)' }}> ↑</span>}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })()}
 
             {/* 해석 */}
             <div className="arcana-panel rounded-2xl p-8 mb-8">

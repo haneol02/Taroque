@@ -23,17 +23,24 @@ const CARD_W = 72;
 const CARD_H = 120;
 const FAN_X_SPAN = 1020;
 const FAN_SAG = 90;        // 오른쪽 끝의 최대 상승 높이
-const FAN_CONTAINER_H = 290;
+const FAN_CONTAINER_H = 290; // fallback
 
 // ── 모바일 원형 휠 파라미터
 const MW = 80;    // 카드 너비
 const MH = 134;   // 카드 높이 (3:5 비율)
 const WR = 460;   // 휠 반지름
-const WCH = 310;  // 컨테이너 높이
+const WCH = 310;  // fallback 컨테이너 높이
 // cy = WR + MH/2 → 맨 위 카드의 top이 컨테이너 y=0에 정확히 맞음
 const WCY = WR + Math.round(MH / 2); // 527
 
-function getCardFanStyle(index: number, total: number) {
+// ── 선택 슬롯 팬 파라미터
+const SLOT_CW = 52;
+const SLOT_CH = 78;
+const SLOT_OVERLAP = 44;
+const SLOT_MAX_ROT = 12;
+const SLOT_PAD = 24;
+
+function getCardFanStyle(index: number, total: number, containerH: number = FAN_CONTAINER_H) {
   const t = index / (total - 1);
   const x = (t - 0.5) * FAN_X_SPAN;
   // 오른쪽(t=1)이 가장 높은 단조 상승 아치
@@ -41,7 +48,7 @@ function getCardFanStyle(index: number, total: number) {
   const rotation = (t - 0.5) * -26;
   return {
     left: `calc(50% + ${x}px - ${CARD_W / 2}px)`,
-    top: `${FAN_CONTAINER_H - CARD_H - 6 - yUp}px`,
+    top: `${containerH - CARD_H - 6 - yUp}px`,
     transform: `rotate(${rotation}deg)`,
     // 오른쪽 카드가 위에 겹치도록
     zIndex: Math.round(t * 80 + 10),
@@ -61,6 +68,8 @@ export default function CardDeck({
   const [landingSlot, setLandingSlot] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const proceedRef = useRef<HTMLDivElement>(null);
+  const fanWrapRef = useRef<HTMLDivElement>(null);
+  const [measuredFanH, setMeasuredFanH] = useState<number | null>(null);
 
   const selectionComplete = selections.length >= requiredCount;
 
@@ -87,64 +96,77 @@ export default function CardDeck({
   const isSelected = (idx: number) => selections.some(s => s.cardIndex === idx);
   const isDimmed = (idx: number) => selectionComplete && !isSelected(idx);
 
+  // 팬/휠 높이를 측정 후 collapse 애니메이션에 사용
   useEffect(() => {
-    if (selectionComplete) {
-      setTimeout(() => {
-        proceedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 700);
+    if (selectionComplete && fanWrapRef.current && !measuredFanH) {
+      setMeasuredFanH(fanWrapRef.current.offsetHeight);
     }
-  }, [selectionComplete]);
+  }, [selectionComplete, measuredFanH]);
+
+  const slotFanW = Math.max((requiredCount - 1) * SLOT_OVERLAP + SLOT_CW + SLOT_PAD * 2, 120);
+  const slotFanH = SLOT_CH + 12;
 
   return (
-    <div className="w-full flex flex-col items-center gap-5">
+    <div className="w-full h-full flex flex-col items-center gap-3">
 
-      {/* ── 선택 슬롯 ── */}
-      <div className="flex justify-center gap-3 md:gap-5 flex-wrap px-4">
-        {positions.map((pos, i) => {
-          const sel = selections[i];
-          const actualCard = sel != null ? cards[sel.cardIndex] : null;
-          const isLanding = landingSlot === i;
-          return (
-            <div key={i} className="flex flex-col items-center gap-1.5">
-              <span className="text-xs font-medium tracking-wide" style={{ color: 'rgba(212,175,55,0.75)' }}>
-                {pos}
-              </span>
+      {/* ── 선택 슬롯 (팬 배치) ── */}
+      <div className="shrink-0 flex justify-center px-4">
+        <div className="relative" style={{ width: `${slotFanW}px`, height: `${slotFanH}px` }}>
+          {positions.map((pos, i) => {
+            const sel = selections[i];
+            const actualCard = sel != null ? cards[sel.cardIndex] : null;
+            const isLanding = landingSlot === i;
+            const t = requiredCount > 1 ? i / (requiredCount - 1) : 0.5;
+            const tCentered = t - 0.5;
+            const tilt = tCentered * SLOT_MAX_ROT;
+            const x = SLOT_PAD + i * SLOT_OVERLAP;
+            const arcY = Math.abs(tCentered) * 8;
+            return (
               <div
-                style={{ width: `${CARD_W + 6}px`, height: `${CARD_H + 6}px` }}
-                className={`relative rounded-xl transition-all duration-300 ${actualCard ? 'shadow-lg' : 'slot-empty'}`}
+                key={i}
+                className="absolute"
+                title={pos}
+                style={{
+                  left: `${x}px`,
+                  top: `${arcY}px`,
+                  width: `${SLOT_CW}px`,
+                  height: `${SLOT_CH}px`,
+                  transform: `rotate(${tilt}deg)`,
+                  transformOrigin: '50% 100%',
+                  zIndex: actualCard ? 20 + i : i + 1,
+                }}
               >
                 {actualCard ? (
                   <div
-                    className={`w-full h-full rounded-xl overflow-hidden border-2 ${isLanding ? 'card-land' : ''}`}
-                    style={{ borderColor: 'rgba(212,175,55,0.55)' }}
+                    className={`w-full h-full rounded-lg overflow-hidden border-2 ${isLanding ? 'card-slot-enter' : ''}`}
+                    style={{
+                      borderColor: 'rgba(212,175,55,0.65)',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.55)',
+                      '--card-rot': `${tilt}deg`,
+                    } as React.CSSProperties}
                   >
                     <div className={`w-full h-full relative ${sel!.isReversed ? 'rotate-180' : ''}`}>
-                      <Image src={actualCard.imageUrl} alt={actualCard.name} fill sizes="78px" className="object-contain" />
+                      <Image src={actualCard.imageUrl} alt={actualCard.name} fill sizes="52px" className="object-contain" />
                     </div>
                   </div>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center rounded-xl"
-                    style={{ background: 'rgba(139,92,246,0.05)' }}>
-                    <span className="text-xl font-light" style={{ color: 'rgba(196,181,253,0.35)', fontFamily: 'Georgia, serif' }}>
+                  <div className="w-full h-full flex items-center justify-center rounded-lg slot-empty"
+                    style={{ background: 'rgba(139,92,246,0.04)' }}>
+                    <span className="text-sm font-light"
+                      style={{ color: 'rgba(196,181,253,0.3)', fontFamily: 'Georgia, serif' }}>
                       {i + 1}
                     </span>
                   </div>
                 )}
               </div>
-              {actualCard && (
-                <span className="text-xs text-gray-400 text-center leading-tight" style={{ maxWidth: `${CARD_W + 6}px` }}>
-                  {actualCard.name}
-                  {sel?.isReversed && <span className="text-rose-400/60"> ↑</span>}
-                </span>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* ── 진행 표시 ── */}
       {!selectionComplete && (
-        <div className="flex items-center gap-2">
+        <div className="shrink-0 flex items-center gap-2">
           <span style={{ color: 'rgba(212,175,55,0.4)' }} className="text-sm">⟡</span>
           <span className="text-sm tracking-widest" style={{ color: 'rgba(210,195,255,0.72)' }}>
             {selections.length} / {requiredCount} 선택됨
@@ -154,15 +176,18 @@ export default function CardDeck({
       )}
 
       {/* ── 카드 덱 ── */}
-      {isMobile ? (
-        <div
-          className="w-full overflow-hidden"
-          style={{
-            maxHeight: selectionComplete ? '0px' : `${WCH + 16}px`,
-            opacity: selectionComplete ? 0 : 1,
-            transition: 'max-height 0.6s ease-in-out, opacity 0.5s ease',
-          }}
-        >
+      <div
+        ref={fanWrapRef}
+        className="w-full overflow-hidden"
+        style={{
+          flex: selectionComplete ? '0 0 0px' : '1 1 0px',
+          minHeight: 0,
+          maxHeight: selectionComplete ? '0px' : (measuredFanH ? `${measuredFanH}px` : undefined),
+          opacity: selectionComplete ? 0 : 1,
+          transition: 'max-height 0.5s ease, opacity 0.4s ease',
+        }}
+      >
+        {isMobile ? (
           <MobileCardWheel
             shuffledIndices={shuffledIndices}
             onCardClick={handleCardClick}
@@ -170,26 +195,26 @@ export default function CardDeck({
             isDimmed={isDimmed}
             pickingIndex={pickingIndex}
           />
-        </div>
-      ) : (
-        <DesktopFan
-          shuffledIndices={shuffledIndices}
-          onCardClick={handleCardClick}
-          isSelected={isSelected}
-          isDimmed={isDimmed}
-          pickingIndex={pickingIndex}
-        />
-      )}
+        ) : (
+          <DesktopFan
+            shuffledIndices={shuffledIndices}
+            onCardClick={handleCardClick}
+            isSelected={isSelected}
+            isDimmed={isDimmed}
+            pickingIndex={pickingIndex}
+          />
+        )}
+      </div>
 
       {!selectionComplete && (
-        <p className="text-xs tracking-widest" style={{ color: 'rgba(185,200,225,0.45)' }}>
+        <p className="shrink-0 text-xs tracking-widest" style={{ color: 'rgba(185,200,225,0.45)' }}>
           ✦ &nbsp; {isMobile ? '좌우로 돌려 카드를 탐색하고, 탭하여 선택하세요' : '카드를 선택하면 자동으로 다음 자리로 올라갑니다'} &nbsp; ✦
         </p>
       )}
 
       {/* ── 진행 버튼 ── */}
       {selectionComplete && (
-        <div ref={proceedRef} className="mt-2">
+        <div ref={proceedRef} className="shrink-0 mt-2">
           <button
             onClick={() => onProceed(selections)}
             disabled={isProceedLoading}
@@ -224,10 +249,24 @@ function DesktopFan({
   isDimmed: (i: number) => boolean;
   pickingIndex: number | null;
 }) {
+  const [containerH, setContainerH] = useState(FAN_CONTAINER_H);
+  const outerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = outerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => {
+      const h = e.contentRect.height;
+      if (h > 0) setContainerH(Math.floor(h));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
     <div
-      className="relative w-full overflow-x-auto overflow-y-visible fan-scroll"
-      style={{ height: `${FAN_CONTAINER_H + 30}px` }}
+      ref={outerRef}
+      className="relative w-full h-full overflow-x-auto overflow-y-visible fan-scroll"
     >
       <div className="relative h-full" style={{ minWidth: `${FAN_X_SPAN + CARD_W + 80}px` }}>
         <div className="absolute pointer-events-none" style={{
@@ -237,7 +276,7 @@ function DesktopFan({
           boxShadow: '0 0 30px rgba(139,92,246,0.07)',
         }} />
         {shuffledIndices.map((cardIndex, displayIndex) => {
-          const style = getCardFanStyle(displayIndex, shuffledIndices.length);
+          const style = getCardFanStyle(displayIndex, shuffledIndices.length, containerH);
           const selected = isSelected(cardIndex);
           const dimmed = isDimmed(cardIndex);
           const picking = pickingIndex === cardIndex;
@@ -276,6 +315,7 @@ function MobileCardWheel({
 }) {
   const [rotation, setRotation] = useState(0);
   const [containerW, setContainerW] = useState(375);
+  const [containerH, setContainerH] = useState(WCH);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{
     startX: number;
@@ -290,7 +330,10 @@ function MobileCardWheel({
     const el = containerRef.current;
     if (!el) return;
     setContainerW(el.offsetWidth);
-    const ro = new ResizeObserver(([e]) => setContainerW(e.contentRect.width));
+    const ro = new ResizeObserver(([e]) => {
+      setContainerW(e.contentRect.width);
+      if (e.contentRect.height > 0) setContainerH(e.contentRect.height);
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -357,8 +400,7 @@ function MobileCardWheel({
   return (
     <div
       ref={containerRef}
-      className="w-full relative overflow-hidden select-none"
-      style={{ height: `${WCH}px` }}
+      className="w-full h-full relative overflow-hidden select-none"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -377,7 +419,7 @@ function MobileCardWheel({
         const x = cx + WR * Math.sin(rad);
         const y = cy - WR * Math.cos(rad);
 
-        if (y - MH / 2 > WCH || y + MH / 2 < 0) return null;
+        if (y - MH / 2 > containerH || y + MH / 2 < 0) return null;
 
         const selected = isSelected(cardIndex);
         const dimmed = isDimmed(cardIndex);
