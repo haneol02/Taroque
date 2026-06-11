@@ -299,7 +299,7 @@ function MobileCardWheel({
     const el = containerRef.current;
     if (!el) return;
     const handler = (e: TouchEvent) => {
-      if (dragRef.current?.moved) e.preventDefault();
+      if (dragRef.current?.moved && e.cancelable) e.preventDefault();
     };
     el.addEventListener('touchmove', handler, { passive: false });
     return () => el.removeEventListener('touchmove', handler);
