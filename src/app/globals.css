@@ -422,7 +422,9 @@ body {
 /* 섹션 타이틀 */
 .arcana-title {
   font-family: var(--font-cinzel), var(--font-noto-serif-kr), Georgia, serif;
-  letter-spacing: 0.1em;
+  /* 한국어 긴 제목이 모바일에서 줄바꿈되지 않도록 0.06em 사용
+     (TAROQUE 등 짧은 영문 제목은 별도 inline style로 추가) */
+  letter-spacing: 0.06em;
   text-shadow:
     0 0 20px rgba(200,185,255,0.55),
     0 0 48px rgba(196,181,253,0.28),

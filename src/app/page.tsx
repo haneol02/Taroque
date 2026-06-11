@@ -216,7 +216,8 @@ export default function Home() {
                   style={{ filter: 'drop-shadow(0 0 16px rgba(212,175,55,0.7)) drop-shadow(0 0 32px rgba(196,181,253,0.55))' }}
                 />
               </div>
-              <h1 className="arcana-title text-4xl md:text-6xl lg:text-7xl font-light text-white mb-3 tracking-widest">
+              <h1 className="arcana-title text-4xl md:text-6xl lg:text-7xl font-light text-white mb-3 tracking-widest"
+                style={{ letterSpacing: '0.18em' }}>
                 TAROQUE
               </h1>
               <div className="arcana-divider mx-auto mb-4" />
@@ -278,7 +279,7 @@ export default function Home() {
             <BackButton onClick={() => navigateToPage('home')} label="홈으로" />
 
             <div className="text-center mb-10">
-              <h1 className="arcana-title text-3xl font-light text-white mb-3">어떤 상담을 원하시나요</h1>
+              <h1 className="arcana-title text-2xl sm:text-3xl font-light text-white mb-3">어떤 상담을 원하시나요</h1>
               <div className="arcana-divider mx-auto mb-4" />
               <p className="text-sm" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.08em' }}>
                 타로와 사주 중 원하시는 방법을 선택하세요
@@ -333,7 +334,7 @@ export default function Home() {
             <BackButton onClick={() => navigateToPage('select-service')} />
 
             <div className="text-center mb-10">
-              <h1 className="arcana-title text-3xl font-light text-white mb-3">어떤 고민이 있으신가요</h1>
+              <h1 className="arcana-title text-2xl sm:text-3xl font-light text-white mb-3">어떤 고민이 있으신가요</h1>
               <div className="arcana-divider mx-auto mb-3" />
               <p className="text-sm" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.06em' }}>
                 마음을 털어놓으세요. 비밀은 보장됩니다.
@@ -402,7 +403,7 @@ export default function Home() {
         <div className="h-[100dvh] overflow-hidden space-bg select-none flex flex-col">
           <div className="relative z-10 flex flex-col items-center h-full py-4 gap-3 overflow-hidden">
             <div className="text-center px-6 shrink-0">
-              <h1 className="arcana-title text-3xl md:text-4xl font-light text-white mb-1">
+              <h1 className="arcana-title text-xl sm:text-2xl md:text-3xl font-light text-white mb-1">
                 {cardCount}장의 카드를 뽑아 올리세요
               </h1>
               <p className="text-sm tracking-widest" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.12em' }}>
@@ -557,9 +558,9 @@ export default function Home() {
               const N = selectedCardSelections.length;
               const CW = 72, CH = 108, OVL = 56, PAD = 30, MAX_ROT = 16;
               const fanW = Math.max((N - 1) * OVL + CW + PAD * 2, CW + PAD * 2);
-              const fanH = CH + 48;
+              const fanH = CH + 8;
               return (
-                <div className="flex justify-center mb-10">
+                <div className="flex flex-col items-center mb-10">
                   <div className="relative" style={{ width: `${fanW}px`, height: `${fanH}px` }}>
                     {selectedCardSelections.map((card, index) => {
                       const cardInfo = getCardInfo(card.cardId);
@@ -576,7 +577,7 @@ export default function Home() {
                             left: `${x}px`,
                             top: `${arcY}px`,
                             width: `${CW}px`,
-                            height: `${CH + 38}px`,
+                            height: `${CH}px`,
                             transform: `rotate(${tilt}deg)`,
                             transformOrigin: '50% 100%',
                             zIndex: 10 + index,
@@ -584,10 +585,8 @@ export default function Home() {
                             '--card-rot': `${tilt}deg`,
                           } as React.CSSProperties}
                         >
-                          <div className="rounded-xl overflow-hidden border-2"
+                          <div className="rounded-xl overflow-hidden border-2 w-full h-full"
                             style={{
-                              width: `${CW}px`,
-                              height: `${CH}px`,
                               borderColor: 'rgba(212,175,55,0.55)',
                               boxShadow: '0 6px 24px rgba(0,0,0,0.55)',
                             }}>
@@ -597,15 +596,24 @@ export default function Home() {
                               </div>
                             )}
                           </div>
-                          <div className="text-center mt-1.5"
-                            style={{ transform: `rotate(${-tilt * 0.55}deg)` }}>
-                            <p className="text-[10px] tracking-wide leading-tight"
-                              style={{ color: 'rgba(212,175,55,0.75)' }}>{card.position}</p>
-                            <p className="text-[10px] text-white leading-tight font-medium mt-0.5">
-                              {cardInfo?.name}
-                              {card.isReversed && <span style={{ color: 'rgba(248,113,113,0.7)' }}> ↑</span>}
-                            </p>
-                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* 카드 이름 목록 - 팬 아래 별도 표시 */}
+                  <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-5 px-4">
+                    {selectedCardSelections.map((card, index) => {
+                      const cardInfo = getCardInfo(card.cardId);
+                      return (
+                        <div key={index} className="text-center">
+                          <p className="text-[10px] tracking-wide mb-0.5"
+                            style={{ color: 'rgba(212,175,55,0.7)' }}>
+                            {card.position}
+                          </p>
+                          <p className="text-[11px] font-medium text-white">
+                            {cardInfo?.name}
+                            {card.isReversed && <span style={{ color: 'rgba(248,113,113,0.65)' }}> ↑</span>}
+                          </p>
                         </div>
                       );
                     })}
