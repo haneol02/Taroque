@@ -18,12 +18,18 @@ interface Selection {
   isReversed: boolean;
 }
 
-// 데스크톱 팬 파라미터
+// ── 데스크톱 팬 파라미터
 const CARD_W = 72;
 const CARD_H = 120;
 const FAN_X_SPAN = 1020;
 const FAN_SAG = 48;
 const FAN_CONTAINER_H = 260;
+
+// ── 모바일 휠 파라미터
+const MW = 58;    // 카드 너비
+const MH = 97;    // 카드 높이
+const WR = 520;   // 휠 반지름
+const WCH = 280;  // 컨테이너 높이 (center_y = WCH + 240 = 520 = WR → 맨 위 카드 y=0)
 
 function getCardFanStyle(index: number, total: number) {
   const t = index / (total - 1);
@@ -52,6 +58,8 @@ export default function CardDeck({
   const [isMobile, setIsMobile] = useState(false);
   const proceedRef = useRef<HTMLDivElement>(null);
 
+  const selectionComplete = selections.length >= requiredCount;
+
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -60,10 +68,9 @@ export default function CardDeck({
   }, []);
 
   const handleCardClick = (cardIndex: number) => {
-    if (isSelected(cardIndex) || selections.length >= requiredCount) return;
+    if (isSelected(cardIndex) || selectionComplete) return;
     const isReversed = Math.random() > 0.6;
     const slotIndex = selections.length;
-
     setPickingIndex(cardIndex);
     setTimeout(() => {
       setPickingIndex(null);
@@ -74,15 +81,15 @@ export default function CardDeck({
   };
 
   const isSelected = (idx: number) => selections.some(s => s.cardIndex === idx);
-  const isDimmed = (idx: number) => selections.length >= requiredCount && !isSelected(idx);
+  const isDimmed = (idx: number) => selectionComplete && !isSelected(idx);
 
   useEffect(() => {
-    if (selections.length === requiredCount) {
+    if (selectionComplete) {
       setTimeout(() => {
         proceedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 400);
+      }, 700);
     }
-  }, [selections.length, requiredCount]);
+  }, [selectionComplete]);
 
   return (
     <div className="w-full flex flex-col items-center gap-5">
@@ -93,7 +100,6 @@ export default function CardDeck({
           const sel = selections[i];
           const actualCard = sel != null ? cards[sel.cardIndex] : null;
           const isLanding = landingSlot === i;
-
           return (
             <div key={i} className="flex flex-col items-center gap-1.5">
               <span className="text-xs font-medium tracking-wide" style={{ color: 'rgba(212,175,55,0.75)' }}>
@@ -133,23 +139,34 @@ export default function CardDeck({
       </div>
 
       {/* ── 진행 표시 ── */}
-      <div className="flex items-center gap-2">
-        <span style={{ color: 'rgba(212,175,55,0.4)' }} className="text-sm">⟡</span>
-        <span className="text-sm tracking-widest" style={{ color: 'rgba(196,181,253,0.5)' }}>
-          {selections.length} / {requiredCount} 선택됨
-        </span>
-        <span style={{ color: 'rgba(212,175,55,0.4)' }} className="text-sm">⟡</span>
-      </div>
+      {!selectionComplete && (
+        <div className="flex items-center gap-2">
+          <span style={{ color: 'rgba(212,175,55,0.4)' }} className="text-sm">⟡</span>
+          <span className="text-sm tracking-widest" style={{ color: 'rgba(210,195,255,0.72)' }}>
+            {selections.length} / {requiredCount} 선택됨
+          </span>
+          <span style={{ color: 'rgba(212,175,55,0.4)' }} className="text-sm">⟡</span>
+        </div>
+      )}
 
-      {/* ── 카드 덱 (데스크톱: 팬 / 모바일: 그리드) ── */}
+      {/* ── 카드 덱 ── */}
       {isMobile ? (
-        <MobileCardGrid
-          shuffledIndices={shuffledIndices}
-          onCardClick={handleCardClick}
-          isSelected={isSelected}
-          isDimmed={isDimmed}
-          pickingIndex={pickingIndex}
-        />
+        <div
+          className="w-full overflow-hidden"
+          style={{
+            maxHeight: selectionComplete ? '0px' : `${WCH + 24}px`,
+            opacity: selectionComplete ? 0 : 1,
+            transition: 'max-height 0.6s ease-in-out, opacity 0.5s ease',
+          }}
+        >
+          <MobileCardWheel
+            shuffledIndices={shuffledIndices}
+            onCardClick={handleCardClick}
+            isSelected={isSelected}
+            isDimmed={isDimmed}
+            pickingIndex={pickingIndex}
+          />
+        </div>
       ) : (
         <DesktopFan
           shuffledIndices={shuffledIndices}
@@ -160,12 +177,14 @@ export default function CardDeck({
         />
       )}
 
-      <p className="text-xs tracking-widest" style={{ color: 'rgba(148,163,184,0.4)' }}>
-        ✦ &nbsp; {isMobile ? '카드를 탭하여 선택하세요' : '카드를 선택하면 자동으로 다음 자리로 올라갑니다'} &nbsp; ✦
-      </p>
+      {!selectionComplete && (
+        <p className="text-xs tracking-widest" style={{ color: 'rgba(185,200,225,0.45)' }}>
+          ✦ &nbsp; {isMobile ? '좌우로 돌려 카드를 탐색하고, 탭하여 선택하세요' : '카드를 선택하면 자동으로 다음 자리로 올라갑니다'} &nbsp; ✦
+        </p>
+      )}
 
       {/* ── 진행 버튼 ── */}
-      {selections.length === requiredCount && (
+      {selectionComplete && (
         <div ref={proceedRef} className="mt-2">
           <button
             onClick={() => onProceed(selections)}
@@ -207,21 +226,17 @@ function DesktopFan({
       style={{ height: `${FAN_CONTAINER_H + 30}px` }}
     >
       <div className="relative h-full" style={{ minWidth: `${FAN_X_SPAN + CARD_W + 80}px` }}>
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            left: '50%', bottom: '4px', transform: 'translateX(-50%)',
-            width: '100px', height: '100px', borderRadius: '50%',
-            border: '1px solid rgba(196,181,253,0.1)',
-            boxShadow: '0 0 30px rgba(139,92,246,0.07)',
-          }}
-        />
+        <div className="absolute pointer-events-none" style={{
+          left: '50%', bottom: '4px', transform: 'translateX(-50%)',
+          width: '100px', height: '100px', borderRadius: '50%',
+          border: '1px solid rgba(196,181,253,0.1)',
+          boxShadow: '0 0 30px rgba(139,92,246,0.07)',
+        }} />
         {shuffledIndices.map((cardIndex, displayIndex) => {
           const style = getCardFanStyle(displayIndex, shuffledIndices.length);
           const selected = isSelected(cardIndex);
           const dimmed = isDimmed(cardIndex);
           const picking = pickingIndex === cardIndex;
-
           return (
             <button
               key={displayIndex}
@@ -245,8 +260,8 @@ function DesktopFan({
   );
 }
 
-// ── 모바일 그리드 ─────────────────────────────────────────────
-function MobileCardGrid({
+// ── 모바일 원형 휠 ────────────────────────────────────────────
+function MobileCardWheel({
   shuffledIndices, onCardClick, isSelected, isDimmed, pickingIndex,
 }: {
   shuffledIndices: number[];
@@ -255,42 +270,162 @@ function MobileCardGrid({
   isDimmed: (i: number) => boolean;
   pickingIndex: number | null;
 }) {
+  const [rotation, setRotation] = useState(0);
+  const [containerW, setContainerW] = useState(375);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{
+    startX: number;
+    lastX: number;
+    velocity: number;
+    moved: boolean;
+  } | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  // 컨테이너 너비 감지
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    setContainerW(el.offsetWidth);
+    const ro = new ResizeObserver(([e]) => setContainerW(e.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // passive:false 터치무브 (스크롤 방지)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const handler = (e: TouchEvent) => {
+      if (dragRef.current?.moved) e.preventDefault();
+    };
+    el.addEventListener('touchmove', handler, { passive: false });
+    return () => el.removeEventListener('touchmove', handler);
+  }, []);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+    dragRef.current = {
+      startX: e.touches[0].clientX,
+      lastX: e.touches[0].clientX,
+      velocity: 0,
+      moved: false,
+    };
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!dragRef.current) return;
+    const x = e.touches[0].clientX;
+    const dx = x - dragRef.current.lastX;
+    if (Math.abs(x - dragRef.current.startX) > 6) dragRef.current.moved = true;
+    // 지수이동평균으로 속도 스무딩
+    dragRef.current.velocity = dragRef.current.velocity * 0.65 + dx * 0.35;
+    dragRef.current.lastX = x;
+    const dRot = (dx / WR) * (180 / Math.PI);
+    setRotation(r => r + dRot);
+  };
+
+  const onTouchEnd = () => {
+    if (!dragRef.current) return;
+    const wasDrag = dragRef.current.moved;
+    let vel = dragRef.current.velocity * 2.8;
+    dragRef.current = null;
+
+    if (!wasDrag || Math.abs(vel) < 0.2) return;
+
+    // 모멘텀 감속
+    const decay = () => {
+      vel *= 0.935;
+      if (Math.abs(vel) < 0.12) return;
+      const dRot = (vel / WR) * (180 / Math.PI);
+      setRotation(r => r + dRot);
+      rafRef.current = requestAnimationFrame(decay);
+    };
+    rafRef.current = requestAnimationFrame(decay);
+  };
+
+  useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
+
+  const cx = containerW / 2;
+  const cy = WCH + 240; // center below container; WR=520 so top card is at y≈0
+  const n = shuffledIndices.length;
+  const angStep = 360 / n;
+
   return (
-    <div className="w-full px-3 relative">
-      {/* 스크롤 힌트 그라디언트 */}
-      <div className="absolute bottom-0 left-3 right-3 h-10 pointer-events-none z-10 rounded-b-2xl"
-        style={{ background: 'linear-gradient(to top, rgba(26,20,58,0.9), transparent)' }} />
+    <div
+      ref={containerRef}
+      className="w-full relative overflow-hidden select-none"
+      style={{ height: `${WCH}px`, cursor: 'grab' }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {shuffledIndices.map((cardIndex, i) => {
+        const angleDeg = ((rotation + i * angStep) % 360 + 360) % 360;
+        // -180~180 정규화 (0=top, +값=right, -값=left)
+        const normAngle = angleDeg > 180 ? angleDeg - 360 : angleDeg;
+        const distFromTop = Math.abs(normAngle);
 
-      <div
-        className="arcana-panel rounded-2xl p-3 overflow-y-auto mobile-card-scroll"
-        style={{ maxHeight: '54vh' }}
-      >
-        <div className="grid grid-cols-3 gap-2">
-          {shuffledIndices.map((cardIndex, displayIndex) => {
-            const selected = isSelected(cardIndex);
-            const dimmed = isDimmed(cardIndex);
-            const picking = pickingIndex === cardIndex;
+        // 시야 밖 카드는 렌더 스킵 (성능)
+        if (distFromTop > 88) return null;
 
-            return (
-              <button
-                key={displayIndex}
-                onClick={() => onCardClick(cardIndex)}
-                disabled={dimmed || selected}
-                aria-label={`카드 ${displayIndex + 1}`}
-                className={`relative rounded-xl focus:outline-none overflow-hidden
-                  ${picking ? 'deck-card-picking' : ''}
-                  ${selected ? 'deck-card-picked' : ''}
-                  ${dimmed ? 'deck-card-dimmed' : ''}
-                  ${!selected && !dimmed && !picking ? 'mobile-card-tap' : ''}
-                `}
-                style={{ aspectRatio: '3 / 5' }}
-              >
-                <MobileCardBack />
-              </button>
-            );
-          })}
-        </div>
-      </div>
+        const rad = (angleDeg * Math.PI) / 180;
+        const x = cx + WR * Math.sin(rad);
+        const y = cy - WR * Math.cos(rad);
+
+        if (y > WCH + MH) return null;
+
+        const selected = isSelected(cardIndex);
+        const dimmed = isDimmed(cardIndex);
+        const picking = pickingIndex === cardIndex;
+
+        // 거리에 따른 스케일/불투명도
+        const t = Math.min(distFromTop / 78, 1);
+        const scale = 1 - t * 0.24;
+        const alpha = selected ? 0 : dimmed ? 0.15 : 1 - t * 0.42;
+
+        // 카드 기울기 (휠 곡률에 맞게)
+        const tilt = normAngle * 0.88;
+
+        return (
+          <button
+            key={i}
+            onClick={() => {
+              // 드래그 중이면 탭으로 인식 안 함
+              if (dragRef.current?.moved) return;
+              onCardClick(cardIndex);
+            }}
+            disabled={dimmed || selected}
+            className="absolute focus:outline-none"
+            style={{
+              left: `${x - MW / 2}px`,
+              top: `${y - MH / 2}px`,
+              width: `${MW}px`,
+              height: `${MH}px`,
+              transform: `rotate(${tilt}deg) scale(${scale})${picking ? ' translateY(-58px) scale(1.18)' : ''}`,
+              opacity: alpha,
+              zIndex: Math.round(100 - distFromTop),
+              transition: picking
+                ? 'transform 0.15s ease-out, opacity 0.15s'
+                : 'opacity 0.2s ease',
+            }}
+          >
+            <MobileCardBack />
+          </button>
+        );
+      })}
+
+      {/* 중앙 기준선 */}
+      <div className="absolute top-0 left-1/2 -translate-x-px w-px pointer-events-none"
+        style={{ height: '20px', background: 'linear-gradient(to bottom, rgba(212,175,55,0.55), transparent)' }} />
+
+      {/* 사이드 페이드 */}
+      <div className="absolute inset-y-0 left-0 w-16 pointer-events-none"
+        style={{ background: 'linear-gradient(to right, rgba(24,20,74,1) 30%, transparent)' }} />
+      <div className="absolute inset-y-0 right-0 w-16 pointer-events-none"
+        style={{ background: 'linear-gradient(to left, rgba(24,20,74,1) 30%, transparent)' }} />
+      {/* 하단 페이드 */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none"
+        style={{ background: 'linear-gradient(to top, rgba(24,20,74,1), transparent)' }} />
     </div>
   );
 }
@@ -298,14 +433,11 @@ function MobileCardGrid({
 // ── 카드 뒷면 (데스크톱) ──────────────────────────────────────
 function FanCardBack() {
   return (
-    <div
-      className="w-full h-full rounded-lg overflow-hidden relative select-none"
-      style={{
-        background: 'linear-gradient(160deg, #1c1640 0%, #13102e 50%, #0c0a1e 100%)',
-        border: '1px solid rgba(212,175,55,0.4)',
-        boxShadow: 'inset 0 0 10px rgba(139,92,246,0.06)',
-      }}
-    >
+    <div className="w-full h-full rounded-lg overflow-hidden relative select-none" style={{
+      background: 'linear-gradient(160deg, #1c1640 0%, #13102e 50%, #0c0a1e 100%)',
+      border: '1px solid rgba(212,175,55,0.4)',
+      boxShadow: 'inset 0 0 10px rgba(139,92,246,0.06)',
+    }}>
       <div className="absolute pointer-events-none" style={{ inset: '3px', border: '1px solid rgba(212,175,55,0.18)', borderRadius: '5px' }} />
       {([
         [18, 15, 1.5], [52, 10, 1], [75, 28, 1], [28, 58, 1.5],
@@ -313,8 +445,7 @@ function FanCardBack() {
         [80, 15, 1], [10, 55, 1],
       ] as [number, number, number][]).map(([x, y, r], i) => (
         <div key={i} className="absolute rounded-full pointer-events-none"
-          style={{ left: `${x}%`, top: `${y}%`, width: `${r}px`, height: `${r}px`, background: 'rgba(212,175,55,0.65)' }}
-        />
+          style={{ left: `${x}%`, top: `${y}%`, width: `${r}px`, height: `${r}px`, background: 'rgba(212,175,55,0.65)' }} />
       ))}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <svg viewBox="0 0 42 52" className="w-8 h-10 opacity-85" fill="none">
@@ -343,9 +474,9 @@ function FanCardBack() {
 function MobileCardBack() {
   return (
     <div className="w-full h-full rounded-lg overflow-hidden relative select-none mobile-card-back">
-      <div className="absolute pointer-events-none" style={{ inset: '2px', border: '1px solid rgba(212,175,55,0.15)', borderRadius: '4px' }} />
+      <div className="absolute pointer-events-none" style={{ inset: '2px', border: '1px solid rgba(212,175,55,0.18)', borderRadius: '4px' }} />
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <svg viewBox="0 0 42 52" className="w-5 h-7 opacity-75" fill="none">
+        <svg viewBox="0 0 42 52" className="w-5 h-7 opacity-80" fill="none">
           <path d="M23 9 C15 9 8 15.5 8 24 C8 32.5 15 39 23 39 C17 37 13 31 13 24 C13 17 17 11.5 23 9Z" fill="rgba(212,175,55,0.85)" />
           <circle cx="30" cy="14" r="1.3" fill="rgba(212,175,55,0.8)" />
           <circle cx="28" cy="31" r="1.1" fill="rgba(212,175,55,0.7)" />
