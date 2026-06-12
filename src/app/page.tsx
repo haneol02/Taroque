@@ -535,7 +535,7 @@ export default function Home() {
             {/* 선택된 카드들 - 팬 배치 */}
             {(() => {
               const N = selectedCardSelections.length;
-              const CW = 72, CH = 108, PAD = 30, MAX_ROT = 16;
+              const CW = 72, CH = 121, PAD = 30, MAX_ROT = 16; // CH: 72 * 1.677 실제 카드 비율
               // 가용 너비에 맞게 겹침 자동 축소 (px-6 양쪽 = 48px)
               const availW = typeof window !== 'undefined' ? window.innerWidth - 48 : 600;
               const OVL = N > 1 ? Math.min(56, Math.floor((availW - CW - PAD * 2) / (N - 1))) : 56;
@@ -573,7 +573,7 @@ export default function Home() {
                             }}>
                             {cardInfo && (
                               <div className={`w-full h-full relative ${card.isReversed ? 'rotate-180' : ''}`}>
-                                <Image src={cardInfo.imageUrl} alt={cardInfo.name} fill sizes="72px" className="object-cover" />
+                                <Image src={cardInfo.imageUrl} alt={cardInfo.name} fill sizes="72px" className="object-contain" />
                               </div>
                             )}
                           </div>
