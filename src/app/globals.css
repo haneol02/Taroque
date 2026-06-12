@@ -423,13 +423,10 @@ textarea::placeholder { color: rgba(180,165,220,0.52); }
 /* 섹션 타이틀 */
 .arcana-title {
   font-family: var(--font-cinzel), var(--font-noto-serif-kr), Georgia, serif;
-  /* 한국어 긴 제목이 모바일에서 줄바꿈되지 않도록 0.06em 사용
-     (TAROQUE 등 짧은 영문 제목은 별도 inline style로 추가) */
   letter-spacing: 0.06em;
   text-shadow:
-    0 0 20px rgba(200,185,255,0.55),
-    0 0 48px rgba(196,181,253,0.28),
-    0 2px 4px rgba(0,0,0,0.5);
+    0 0 24px rgba(200,185,255,0.28),
+    0 1px 3px rgba(0,0,0,0.45);
 }
 
 /* 예시 질문 버튼 */

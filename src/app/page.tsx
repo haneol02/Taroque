@@ -24,8 +24,8 @@ function ArcanaLoader({ message }: { message: string }) {
           />
         </div>
         <p className="arcana-title text-lg font-light text-white mb-2">{message}</p>
-        <p className="text-xs tracking-widest" style={{ color: 'rgba(196,181,253,0.65)' }}>
-          ✦ &nbsp; 잠시만 기다려주세요 &nbsp; ✦
+        <p className="text-xs tracking-wider" style={{ color: 'rgba(196,181,253,0.65)' }}>
+          잠시만 기다려주세요
         </p>
       </div>
     </div>
@@ -202,70 +202,49 @@ export default function Home() {
     if (currentPage === 'home') {
       return (
         <div className="min-h-screen space-bg select-none flex flex-col">
-          <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 py-20 text-center">
-
+          {/* 중앙 콘텐츠 */}
+          <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 text-center">
             {/* 로고 */}
-            <div className="mb-8">
-              <div className="relative inline-block mb-5">
+            <div className="mb-10">
+              <div className="relative inline-block mb-6">
                 <div className="absolute inset-0 rounded-full blur-2xl"
-                  style={{ background: 'rgba(139,92,246,0.35)', transform: 'scale(2.5)' }} />
+                  style={{ background: 'rgba(139,92,246,0.32)', transform: 'scale(2.4)' }} />
                 <div className="absolute inset-0 rounded-full blur-3xl"
-                  style={{ background: 'rgba(212,175,55,0.18)', transform: 'scale(3.5)' }} />
+                  style={{ background: 'rgba(212,175,55,0.15)', transform: 'scale(3.2)' }} />
                 <Image src="/logo.png" alt="Taroque" width={80} height={80}
-                  className="w-16 h-16 md:w-20 md:h-20 relative z-10"
-                  style={{ filter: 'drop-shadow(0 0 16px rgba(212,175,55,0.7)) drop-shadow(0 0 32px rgba(196,181,253,0.55))' }}
+                  className="w-20 h-20 md:w-24 md:h-24 relative z-10"
+                  style={{ filter: 'drop-shadow(0 0 14px rgba(212,175,55,0.65)) drop-shadow(0 0 28px rgba(196,181,253,0.45))' }}
                 />
               </div>
-              <h1 className="arcana-title text-4xl md:text-6xl lg:text-7xl font-light text-white mb-3 tracking-widest"
+              <h1 className="arcana-title text-4xl md:text-6xl lg:text-7xl font-light text-white mb-3"
                 style={{ letterSpacing: '0.18em' }}>
                 TAROQUE
               </h1>
-              <div className="arcana-divider mx-auto mb-4" />
-              <p className="text-base md:text-xl font-light mb-2" style={{ color: 'rgba(212,175,55,0.95)', letterSpacing: '0.1em' }}>
-                마음의 답을 찾아드려요
-              </p>
-              <p className="text-xs md:text-sm leading-relaxed" style={{ color: 'rgba(210,195,255,0.88)', letterSpacing: '0.06em' }}>
-                고민을 자유롭게 털어놓으세요. 타로와 사주를 통해 답해드립니다.
+              <div className="arcana-divider mx-auto mb-5" />
+              <p className="text-sm md:text-base font-light mb-2" style={{ color: 'rgba(212,175,55,0.9)', letterSpacing: '0.08em' }}>
+                타로와 사주로 마음의 답을 찾아드립니다
               </p>
             </div>
 
             {/* 시작 버튼 */}
             <button
               onClick={() => navigateToPage('select-service')}
-              className="arcana-btn text-white font-light rounded-full py-3 px-10 mb-16"
+              className="arcana-btn text-white font-light rounded-full py-3.5 px-12 text-base"
             >
-              <span style={{ color: 'rgba(212,175,55,0.75)' }}>✦</span>
-              &nbsp; 상담 시작하기 &nbsp;
-              <span style={{ color: 'rgba(212,175,55,0.75)' }}>✦</span>
+              상담 시작하기
             </button>
+          </div>
 
-            {/* 특징 카드 3개 */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-3xl w-full">
-              {[
-                { icon: '◈', title: '맞춤 분석', desc: '고민에 따라 최적의\n카드 수를 자동 결정' },
-                { icon: '◇', title: '직관적 선택', desc: '마음이 이끄는 대로\n카드를 집어 올리세요' },
-                { icon: '✦', title: '개인화된 해석', desc: '전문가처럼\n따뜻한 조언을 전달' },
-              ].map((item, i) => (
-                <div key={i} className="arcana-panel rounded-xl p-6 text-center">
-                  <div className="text-2xl mb-3" style={{ color: 'rgba(212,175,55,0.82)' }}>{item.icon}</div>
-                  <h3 className="text-sm font-medium text-white mb-2 tracking-wider">{item.title}</h3>
-                  <p className="text-xs leading-relaxed whitespace-pre-line"
-                    style={{ color: 'rgba(185,200,225,0.9)' }}>{item.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* 이메일 */}
-            <div className="mt-12">
-              <button onClick={copyEmailToClipboard} className="relative text-xs arcana-back tracking-wide">
-                문의: gksdjf051@gmail.com
-                {emailCopied && (
-                  <span className="absolute -top-7 left-1/2 -translate-x-1/2 arcana-panel text-white text-xs px-2.5 py-1 rounded-lg whitespace-nowrap">
-                    복사됨!
-                  </span>
-                )}
-              </button>
-            </div>
+          {/* 이메일 - 하단 고정 */}
+          <div className="relative z-10 flex justify-center pb-8">
+            <button onClick={copyEmailToClipboard} className="relative text-xs arcana-back tracking-wide">
+              문의: gksdjf051@gmail.com
+              {emailCopied && (
+                <span className="absolute -top-7 left-1/2 -translate-x-1/2 arcana-panel text-white text-xs px-2.5 py-1 rounded-lg whitespace-nowrap">
+                  복사됨!
+                </span>
+              )}
+            </button>
           </div>
         </div>
       );
@@ -279,10 +258,10 @@ export default function Home() {
             <BackButton onClick={() => navigateToPage('home')} label="홈으로" />
 
             <div className="text-center mb-10">
-              <h1 className="arcana-title text-2xl sm:text-3xl font-light text-white mb-3">어떤 상담을 원하시나요</h1>
+              <h1 className="arcana-title text-2xl sm:text-3xl font-light text-white mb-3">어떤 상담을 원하시나요?</h1>
               <div className="arcana-divider mx-auto mb-4" />
-              <p className="text-sm" style={{ color: 'rgba(210,195,255,0.88)', letterSpacing: '0.08em' }}>
-                타로와 사주 중 원하시는 방법을 선택하세요
+              <p className="text-sm" style={{ color: 'rgba(210,195,255,0.88)', letterSpacing: '0.04em' }}>
+                원하시는 방법을 선택해 주세요
               </p>
             </div>
 
@@ -292,15 +271,14 @@ export default function Home() {
                 onClick={() => navigateToPage('chat')}
                 className="arcana-panel arcana-panel-hover rounded-2xl p-8 text-center"
               >
-                <div className="text-4xl mb-4" style={{ color: 'rgba(212,175,55,0.7)' }}>☽</div>
-                <h2 className="arcana-title text-xl font-light text-white mb-3 tracking-wider">타로</h2>
+                <div className="text-3xl mb-4" style={{ color: 'rgba(212,175,55,0.88)' }}>☽</div>
+                <h2 className="arcana-title text-xl font-light text-white mb-2 tracking-wider">타로</h2>
                 <p className="text-sm leading-relaxed mb-5" style={{ color: 'rgba(185,200,225,0.92)' }}>
                   직관적인 카드를 통해<br />현재 상황과 미래를 살펴봅니다
                 </p>
                 <div className="space-y-1.5 text-xs" style={{ color: 'rgba(210,195,255,0.88)' }}>
-                  <p>✦ 빠른 상담 (5–10분)</p>
-                  <p>✦ 구체적인 질문에 적합</p>
-                  <p>✦ 현재 상황 중심 해석</p>
+                  <p>5–10분 · 구체적인 질문</p>
+                  <p>현재 상황 중심 해석</p>
                 </div>
               </button>
 
@@ -309,15 +287,14 @@ export default function Home() {
                 onClick={() => navigateToPage('saju-chat')}
                 className="arcana-panel arcana-panel-hover rounded-2xl p-8 text-center"
               >
-                <div className="text-4xl mb-4" style={{ color: 'rgba(212,175,55,0.7)' }}>☀</div>
-                <h2 className="arcana-title text-xl font-light text-white mb-3 tracking-wider">사주</h2>
+                <div className="text-3xl mb-4" style={{ color: 'rgba(212,175,55,0.88)' }}>☀</div>
+                <h2 className="arcana-title text-xl font-light text-white mb-2 tracking-wider">사주</h2>
                 <p className="text-sm leading-relaxed mb-5" style={{ color: 'rgba(185,200,225,0.92)' }}>
                   생년월일시를 기반으로<br />운명과 운세를 깊이 분석합니다
                 </p>
                 <div className="space-y-1.5 text-xs" style={{ color: 'rgba(210,195,255,0.88)' }}>
-                  <p>✦ 종합 상담 (10–15분)</p>
-                  <p>✦ 인생 전반적인 조언</p>
-                  <p>✦ 장기적 운세 파악</p>
+                  <p>10–15분 · 인생 전반 조언</p>
+                  <p>장기적 운세 파악</p>
                 </div>
               </button>
             </div>
@@ -334,10 +311,10 @@ export default function Home() {
             <BackButton onClick={() => navigateToPage('select-service')} />
 
             <div className="text-center mb-10">
-              <h1 className="arcana-title text-2xl sm:text-3xl font-light text-white mb-3">어떤 고민이 있으신가요</h1>
+              <h1 className="arcana-title text-2xl sm:text-3xl font-light text-white mb-3">어떤 고민이 있으신가요?</h1>
               <div className="arcana-divider mx-auto mb-3" />
-              <p className="text-sm" style={{ color: 'rgba(210,195,255,0.88)', letterSpacing: '0.06em' }}>
-                마음을 털어놓으세요. 비밀은 보장됩니다.
+              <p className="text-sm" style={{ color: 'rgba(210,195,255,0.88)', letterSpacing: '0.02em' }}>
+                자유롭게 털어놓으세요
               </p>
             </div>
 
@@ -367,11 +344,12 @@ export default function Home() {
 
             {/* 예시 질문 */}
             <div className="space-y-5">
-              <div className="text-center">
-                <p className="text-xs tracking-widest mb-3" style={{ color: 'rgba(212,175,55,0.75)' }}>
-                  ✦ &nbsp; 예시 질문들 &nbsp; ✦
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px" style={{ background: 'rgba(218,175,60,0.2)' }} />
+                <p className="text-xs font-medium tracking-widest shrink-0" style={{ color: 'rgba(212,175,55,0.85)' }}>
+                  예시 질문
                 </p>
-                <div className="arcana-divider mx-auto" />
+                <div className="flex-1 h-px" style={{ background: 'rgba(218,175,60,0.2)' }} />
               </div>
               {categories.map((cat) => (
                 <div key={cat.key} className="arcana-panel rounded-xl p-5">
@@ -406,8 +384,8 @@ export default function Home() {
               <h1 className="arcana-title text-xl sm:text-2xl md:text-3xl font-light text-white mb-1">
                 {cardCount}장의 카드를 뽑아 올리세요
               </h1>
-              <p className="text-sm tracking-widest" style={{ color: 'rgba(210,195,255,0.72)', letterSpacing: '0.12em' }}>
-                마음이 끌리는 카드에 손을 얹듯 선택해보세요
+              <p className="text-sm" style={{ color: 'rgba(210,195,255,0.82)', letterSpacing: '0.02em' }}>
+                마음이 끌리는 카드를 선택해보세요
               </p>
             </div>
             <div className="flex-1 min-h-0 w-full overflow-hidden">
@@ -467,11 +445,12 @@ export default function Home() {
             </form>
 
             <div className="space-y-5">
-              <div className="text-center">
-                <p className="text-xs tracking-widest mb-3" style={{ color: 'rgba(212,175,55,0.75)' }}>
-                  ✦ &nbsp; 예시 질문들 &nbsp; ✦
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px" style={{ background: 'rgba(218,175,60,0.2)' }} />
+                <p className="text-xs font-medium tracking-widest shrink-0" style={{ color: 'rgba(212,175,55,0.85)' }}>
+                  예시 질문
                 </p>
-                <div className="arcana-divider mx-auto" />
+                <div className="flex-1 h-px" style={{ background: 'rgba(218,175,60,0.2)' }} />
               </div>
               {sajuCategories.map((cat) => (
                 <div key={cat.key} className="arcana-panel rounded-xl p-5">
@@ -507,7 +486,7 @@ export default function Home() {
               <div className="arcana-divider mx-auto mb-6" />
               <div className="arcana-panel rounded-xl p-5 max-w-2xl mx-auto">
                 <p className="text-sm leading-relaxed" style={{ color: 'rgba(210,220,240,0.95)' }}>
-                  <span className="text-white font-medium">질문 &nbsp;✦&nbsp; </span>{question}
+                  <span className="text-white font-medium">Q. </span>{question}
                 </p>
                 {sajuInfo && (
                   <p className="text-xs mt-3 pt-3 border-t" style={{ color: 'rgba(196,181,253,0.7)', borderColor: 'rgba(212,175,55,0.15)' }}>
@@ -548,7 +527,7 @@ export default function Home() {
               <div className="arcana-divider mx-auto mb-6" />
               <div className="arcana-panel rounded-xl p-5 max-w-2xl mx-auto">
                 <p className="text-sm leading-relaxed" style={{ color: 'rgba(210,220,240,0.95)' }}>
-                  <span className="text-white font-medium">질문 &nbsp;✦&nbsp; </span>{question}
+                  <span className="text-white font-medium">Q. </span>{question}
                 </p>
               </div>
             </div>
