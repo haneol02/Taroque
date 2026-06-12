@@ -146,15 +146,14 @@ export default function CardDeck({
               >
                 {actualCard ? (
                   <div
-                    className={`w-full h-full rounded-lg overflow-hidden border-2 ${isLanding ? 'card-slot-enter' : ''}`}
+                    className={`w-full h-full rounded-lg overflow-hidden ${isLanding ? 'card-slot-enter' : ''}`}
                     style={{
-                      borderColor: 'rgba(212,175,55,0.65)',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.55)',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.65)',
                       '--card-rot': `${tilt}deg`,
                     } as React.CSSProperties}
                   >
                     <div className={`w-full h-full relative ${sel!.isReversed ? 'rotate-180' : ''}`}>
-                      <Image src={actualCard.imageUrl} alt={actualCard.name} fill sizes="52px" className="object-contain" />
+                      <Image src={actualCard.imageUrl} alt={actualCard.name} fill sizes="52px" className="object-cover" />
                     </div>
                   </div>
                 ) : (

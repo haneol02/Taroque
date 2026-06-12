@@ -567,14 +567,13 @@ export default function Home() {
                             '--card-rot': `${tilt}deg`,
                           } as React.CSSProperties}
                         >
-                          <div className="rounded-xl overflow-hidden border-2 w-full h-full"
+                          <div className="rounded-xl overflow-hidden w-full h-full"
                             style={{
-                              borderColor: 'rgba(212,175,55,0.55)',
-                              boxShadow: '0 6px 24px rgba(0,0,0,0.55)',
+                              boxShadow: '0 6px 28px rgba(0,0,0,0.65)',
                             }}>
                             {cardInfo && (
                               <div className={`w-full h-full relative ${card.isReversed ? 'rotate-180' : ''}`}>
-                                <Image src={cardInfo.imageUrl} alt={cardInfo.name} fill sizes="72px" className="object-contain" />
+                                <Image src={cardInfo.imageUrl} alt={cardInfo.name} fill sizes="72px" className="object-cover" />
                               </div>
                             )}
                           </div>
