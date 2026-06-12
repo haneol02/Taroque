@@ -1,24 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SajuInfo } from '@/types/tarot';
 
 interface SajuInputProps {
   onSajuInfoChange: (sajuInfo: SajuInfo | null) => void;
+  defaultValue?: SajuInfo | null;
 }
 
 const inputClass = 'arcana-input w-full px-3 py-2 rounded-lg text-sm outline-none';
 const labelClass = 'block text-xs font-medium tracking-wider mb-1.5';
 
-export default function SajuInput({ onSajuInfoChange }: SajuInputProps) {
-  const [year, setYear] = useState('');
-  const [month, setMonth] = useState('');
-  const [day, setDay] = useState('');
-  const [hour, setHour] = useState('');
-  const [minute, setMinute] = useState('');
-  const [isLunar, setIsLunar] = useState(false);
-  const [timeUnknown, setTimeUnknown] = useState(false);
-  const [gender, setGender] = useState<'male' | 'female'>('male');
+export default function SajuInput({ onSajuInfoChange, defaultValue }: SajuInputProps) {
+  const [year, setYear] = useState(defaultValue?.year?.toString() ?? '');
+  const [month, setMonth] = useState(defaultValue?.month?.toString().padStart(2, '0') ?? '');
+  const [day, setDay] = useState(defaultValue?.day?.toString().padStart(2, '0') ?? '');
+  const [hour, setHour] = useState(defaultValue && defaultValue.hour >= 0 ? defaultValue.hour.toString().padStart(2, '0') : '');
+  const [minute, setMinute] = useState(defaultValue && defaultValue.hour >= 0 ? defaultValue.minute.toString().padStart(2, '0') : '');
+  const [isLunar, setIsLunar] = useState(defaultValue?.isLunar ?? false);
+  const [timeUnknown, setTimeUnknown] = useState(defaultValue ? defaultValue.hour === -1 : false);
+  const [gender, setGender] = useState<'male' | 'female'>(defaultValue?.gender ?? 'male');
+
+  // defaultValue가 있으면 mount 시 parent에 즉시 알림
+  useEffect(() => {
+    if (defaultValue) onSajuInfoChange(defaultValue);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const notify = (
     y = year, mo = month, d = day,

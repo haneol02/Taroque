@@ -192,8 +192,7 @@ export default function Home() {
   const getCardInfo = (cardId: number) => tarotCards.find(c => c.id === cardId);
 
   const toHtml = (md: string) => {
-    marked.setOptions({ gfm: true, breaks: true });
-    try { return marked(md) as string; } catch { return md; }
+    try { return marked.parse(md, { gfm: true, breaks: true }) as string; } catch { return md; }
   };
 
   const pageContent = () => {
@@ -418,7 +417,7 @@ export default function Home() {
               </p>
             </div>
 
-            <SajuInput onSajuInfoChange={setSajuInfo} />
+            <SajuInput onSajuInfoChange={setSajuInfo} defaultValue={sajuInfo} />
 
             <form onSubmit={handleSajuSubmit} className="mb-10">
               <div className="arcana-panel rounded-xl p-5 mb-4">
