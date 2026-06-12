@@ -114,10 +114,11 @@ export default function CardDeck({
   const slotFanH = SLOT_CH + 12;
 
   return (
-    <div className="w-full h-full flex flex-col items-center gap-3">
+    <div className="w-full h-full flex flex-col items-center">
 
-      {/* ── 선택 슬롯 (팬 배치) ── */}
-      <div className="shrink-0 flex flex-col items-center gap-1.5 px-4">
+      {/* ── 상단 영역: 슬롯 + 진행 표시 (화면 상단 절반 중앙 배치) ── */}
+      <div className="flex flex-col items-center justify-center gap-2 px-4 w-full" style={{ flex: '1 1 0', minHeight: 0 }}>
+        {/* 선택 슬롯 팬 */}
         <div className="relative" style={{ width: `${slotFanW}px`, height: `${slotFanH}px` }}>
           {positions.map((pos, i) => {
             const sel = selections[i];
@@ -182,18 +183,18 @@ export default function CardDeck({
             ))}
           </p>
         )}
-      </div>
 
-      {/* ── 진행 표시 ── */}
-      {!selectionComplete && (
-        <div className="shrink-0 flex items-center gap-2">
-          <span style={{ color: 'rgba(212,175,55,0.65)' }} className="text-sm">⟡</span>
-          <span className="text-sm tracking-widest" style={{ color: 'rgba(210,195,255,0.9)' }}>
-            {selections.length} / {requiredCount} 선택됨
-          </span>
-          <span style={{ color: 'rgba(212,175,55,0.65)' }} className="text-sm">⟡</span>
-        </div>
-      )}
+        {/* 진행 표시 */}
+        {!selectionComplete && (
+          <div className="flex items-center gap-2 mt-1">
+            <span style={{ color: 'rgba(212,175,55,0.65)' }} className="text-sm">⟡</span>
+            <span className="text-sm tracking-widest" style={{ color: 'rgba(210,195,255,0.9)' }}>
+              {selections.length} / {requiredCount} 선택됨
+            </span>
+            <span style={{ color: 'rgba(212,175,55,0.65)' }} className="text-sm">⟡</span>
+          </div>
+        )}
+      </div>
 
       {/* ── 카드 덱 ── */}
       <div
@@ -227,8 +228,8 @@ export default function CardDeck({
       </div>
 
       {!selectionComplete && (
-        <p className="shrink-0 text-xs tracking-widest" style={{ color: 'rgba(185,200,225,0.7)' }}>
-          ✦ &nbsp; {isMobile ? '좌우로 돌려 카드를 탐색하고, 탭하여 선택하세요' : '카드를 선택하면 자동으로 다음 자리로 올라갑니다'} &nbsp; ✦
+        <p className="shrink-0 text-xs pb-2" style={{ color: 'rgba(185,200,225,0.65)' }}>
+          {isMobile ? '좌우로 돌려 탐색 · 탭하여 선택' : '카드를 선택하면 자동으로 다음 자리로 올라갑니다'}
         </p>
       )}
 
@@ -417,7 +418,7 @@ function MobileCardWheel({
   const cx = containerW / 2;
   // 하단 고정 아치: 원 중심이 화면 위쪽에, 카드가 화면 아래쪽에 모임
   // wr = 컨테이너 높이의 82%, 하단에 카드가 붙도록 cyB 계산
-  const wr = Math.max(150, Math.min(420, containerH * 0.82));
+  const wr = Math.max(130, Math.min(380, containerH * 0.70));
   wrRef.current = wr;
   const cyB = containerH - Math.round(MH / 2) - Math.round(wr);
   const n = shuffledIndices.length;
