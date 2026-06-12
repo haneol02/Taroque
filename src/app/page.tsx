@@ -479,8 +479,8 @@ export default function Home() {
       if (isLoadingSaju) return <ArcanaLoader message="사주를 풀이하고 있어요" />;
       return (
         <div className="min-h-screen space-bg">
-          <div className="relative z-10 max-w-4xl mx-auto px-6 py-16">
-            <div className="text-center mb-10">
+          <div className="relative z-10 max-w-4xl mx-auto px-3 sm:px-6 py-8 sm:py-16">
+            <div className="text-center mb-6 sm:mb-10">
               <h1 className="arcana-title text-3xl font-light text-white mb-4">사주 풀이 결과</h1>
               <div className="arcana-divider mx-auto mb-6" />
               <div className="arcana-panel rounded-xl p-5 max-w-2xl mx-auto">
@@ -497,7 +497,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="arcana-panel rounded-2xl p-8 mb-8">
+            <div className="arcana-panel rounded-2xl p-4 sm:p-8 mb-6 sm:mb-8">
               <div className="text-gray-300 prose prose-invert max-w-none leading-relaxed interpretation-content"
                 dangerouslySetInnerHTML={{ __html: toHtml(sajuInterpretation) }} />
             </div>
@@ -520,7 +520,7 @@ export default function Home() {
       if (isLoadingResult) return <ArcanaLoader message="카드를 해석하고 있어요" />;
       return (
         <div className="min-h-screen space-bg">
-          <div className="relative z-10 max-w-5xl mx-auto px-6 py-16">
+          <div className="relative z-10 max-w-5xl mx-auto px-3 sm:px-6 py-8 sm:py-16">
             <div className="text-center mb-10">
               <h1 className="arcana-title text-3xl font-light text-white mb-4">리딩 결과</h1>
               <div className="arcana-divider mx-auto mb-6" />
@@ -603,7 +603,7 @@ export default function Home() {
             })()}
 
             {/* 해석 */}
-            <div className="arcana-panel rounded-2xl p-8 mb-8">
+            <div className="arcana-panel rounded-2xl p-4 sm:p-8 mb-6 sm:mb-8">
               <div className="text-gray-300 prose prose-invert max-w-none leading-relaxed interpretation-content"
                 dangerouslySetInnerHTML={{ __html: toHtml(interpretation) }} />
             </div>

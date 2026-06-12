@@ -477,20 +477,28 @@ textarea::placeholder { color: rgba(180,165,220,0.52); }
 /* ===== 타로 해석 결과 마크다운 스타일 ===== */
 .interpretation-content {
   font-family: var(--font-noto-serif-kr), "Apple SD Gothic Neo", serif;
-  line-height: 1.85;
+  font-size: 0.8rem;
+  line-height: 1.8;
   letter-spacing: 0.02em;
+}
+
+@media (min-width: 640px) {
+  .interpretation-content {
+    font-size: 0.9375rem;
+    line-height: 1.85;
+  }
 }
 
 .interpretation-content h1 {
   font-family: var(--font-cinzel), var(--font-noto-serif-kr), Georgia, serif;
-  @apply text-2xl font-medium text-white mt-8 mb-4 first:mt-0;
+  @apply text-lg sm:text-2xl font-medium text-white mt-6 sm:mt-8 mb-3 sm:mb-4 first:mt-0;
   letter-spacing: 0.08em;
   text-shadow: 0 0 16px rgba(196,181,253,0.4);
 }
 
 .interpretation-content h2 {
   font-family: var(--font-cinzel), var(--font-noto-serif-kr), Georgia, serif;
-  @apply text-xl font-medium text-white mt-8 mb-4 first:mt-0;
+  @apply text-base sm:text-xl font-medium text-white mt-6 sm:mt-8 mb-3 sm:mb-4 first:mt-0;
   letter-spacing: 0.06em;
   color: rgba(218,175,60,0.92) !important;
   border-bottom: 1px solid rgba(218,175,60,0.15);
@@ -498,7 +506,7 @@ textarea::placeholder { color: rgba(180,165,220,0.52); }
 }
 
 .interpretation-content h3 {
-  @apply text-base font-medium mt-6 mb-2 first:mt-0;
+  @apply text-sm sm:text-base font-medium mt-5 sm:mt-6 mb-2 first:mt-0;
   color: rgba(200,185,255,0.9);
   letter-spacing: 0.04em;
 }
